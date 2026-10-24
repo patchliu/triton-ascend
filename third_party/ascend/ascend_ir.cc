@@ -40,6 +40,7 @@
 #include "mlir/AsmParser/AsmParser.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Arith/Utils/Utils.h"
+#include "mlir/Dialect/Func/Extensions/InlinerExtension.h"
 #include "mlir/Dialect/Math/IR/Math.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
@@ -582,6 +583,7 @@ void init_ascend_ir(py::module &&m) {
   m.def("load_dialects", [](MLIRContext &context) {
     gDefaultAscendContext = &context;
     DialectRegistry registry;
+    mlir::func::registerInlinerExtension(registry);
     registry.insert<annotation::AnnotationDialect, mlir::hivm::HIVMDialect,
                     scope::ScopeDialect>();
     context.appendDialectRegistry(registry);
