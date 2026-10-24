@@ -709,7 +709,11 @@ def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
             f"--enable-auto-bind-sub-block={get_auto_bind_sub_block_option(metadata)}",
         ]
 
-        _compile_option_list += [f"--enable-optimized-metaop={is_cann_version_at_least(9, 2, 0)}"]
+        # The bundled bishengir payload (tla-1022 ab981234 build) predates the
+        # --enable-optimized-metaop option; drop it to stay compatible. Without
+        # the flag, resolveTemplateBitcodeOptLevel picks O0 on CANN < 9.2.0,
+        # identical to the explicit False value that would be passed here.
+        _compile_option_list += []
 
         npu_utils = NPUUtils()
         if npu_utils.has_device_limit():
@@ -956,7 +960,9 @@ def linalg_to_bin_enable_npu_compile_A2_A3(linalg: str, metadata, opt):
             f"--enable-auto-bind-sub-block={get_auto_bind_sub_block_option(metadata)}",
         ]
 
-        _compile_option_list += [f"--enable-optimized-metaop={is_cann_version_at_least(9, 2, 0)}"]
+        # See the first --enable-optimized-metaop site above: the bundled
+        # bishengir payload does not support this option.
+        _compile_option_list += []
 
         if _is_ascend_sanitizer_enabled():
             _compile_option_list += ["--enable-sanitizer=true"]
