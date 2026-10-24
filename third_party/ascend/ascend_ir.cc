@@ -1941,21 +1941,8 @@ void init_ascend_ir(py::module &&m) {
                throw std::invalid_argument(
                    "TLA buffer shape and strides must have the same rank");
              auto *ctx = self.getBuilder().getContext();
-             // The LLVM lowering of PointerCastOp requires the identity
-             // layout, so a statically zero offset with row-major strides must
-             // not materialize a StridedLayoutAttr. A singleton dimension does
-             // not affect the address calculation.
-             bool isIdentityLayout = offset.has_value() && *offset == 0;
-             int64_t expectedStride = 1;
-             for (size_t i = shape.size(); i-- > 0;) {
-               if (shape[i] > 1 && strides[i] != expectedStride)
-                 isIdentityLayout = false;
-               expectedStride *= shape[i];
-             }
-             MemRefLayoutAttrInterface layout;
-             if (!isIdentityLayout)
-               layout = StridedLayoutAttr::get(
-                   ctx, offset.value_or(ShapedType::kDynamic), strides);
+             auto layout = StridedLayoutAttr::get(
+                 ctx, offset.value_or(ShapedType::kDynamic), strides);
              return MemRefType::get(
                  shape, elementType, layout,
                  hivm::AddressSpaceAttr::get(ctx, *memorySpace));
