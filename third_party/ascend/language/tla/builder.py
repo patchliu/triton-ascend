@@ -43,6 +43,7 @@ def setup_unified_builder(main_builder, ascend_builder):
         'create_tla_alloc',
         'create_tla_bind',
         'create_tla_subview',
+        'create_tla_reinterpret_cast',
         'create_hivm_load',
         'create_hivm_store',
         'create_annotation_mark',

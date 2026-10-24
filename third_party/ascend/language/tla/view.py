@@ -17,17 +17,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Create buffer views: kernel pointer entry or in-buffer subview.
+"""Create buffer views: a kernel pointer entry or an in-buffer tile.
 
-One API, two entry forms:
+``tla.view`` aliases memory as a buffer for subsequent DMA/simd ops:
 
-- ``tla.view(ptr, shape, strides=None, offsets=None, space="gm")`` aliases a
-  kernel pointer argument as a buffer, optionally shifted by ``offsets`` (a
-  ``ptr_to_int`` cast + native ``hivm.hir.pointer_cast``).  ``strides`` are the
-  final memref strides, defaulting to row-major.
-- ``tla.view(gm, (256,), strides=(1,), offsets=(base,))`` builds a tile of a
-  buffer (the former subview role).  Strides are relative to the source view,
-  as in memref.subview.
+- Pointer entry: ``view(ptr, shape, strides, offsets, space="gm")``.  Lowers to
+  ``ptr_to_int`` + a 1-D ``hivm.hir.pointer_cast`` + one
+  ``memref.reinterpret_cast`` carrying the linear offset ``sum(off_i*stride_i)``
+  and the full sizes/strides -- npuir's form, valid for any stride/offset.
+  ``strides`` are the final memref strides, defaulting to row-major.
+- Buffer tile: ``view(buf, sizes, strides, offsets)``.  Lowers to a
+  ``memref.subview``; strides are relative to the source view.
 
 ``space`` only applies to a pointer entry; a buffer's space is its own.
 """
@@ -60,33 +60,33 @@ def _subview(src, sizes, steps, offsets, semantic):
     return buffer(handle, ty)
 
 
-def _pointer_entry(src, sizes, strides, offsets, space, semantic):
-    """Kernel pointer entry: alias pointer memory as a buffer in one step.
+def _entry(src, sizes, strides, offsets, space, semantic):
+    """Pointer view: 1-D pointer_cast + one memref.reinterpret_cast.
 
-    ``offsets`` (element units) are folded into the pointer address, so a
-    dynamic tile such as ``view(ptr, (BM, HID), offsets=(pt * BM, 0))`` emits a
-    single ``hivm.hir.pointer_cast`` at the shifted address (no subview op).
+    Lowers to::
+
+      %cast = hivm.hir.pointer_cast %ptr : memref<1xelem, space>
+      %view = memref.reinterpret_cast %cast to
+        offset: [sum(off_i * stride_i)], sizes: [sizes], strides: [strides]
+        : memref<1xelem, space> to memref<shape, strided<strides, offset: ?>, space>
+
+    The 1-D entry is identity (PointerCastOp's LLVM lowering requires it);
+    the strided final view is npuir's form, valid for any stride/offset.
     """
-    if offsets is not None:
-        offsets = tuple(offsets)
-        if len(offsets) != len(sizes):
-            raise ValueError("view offsets must match buffer rank")
-        # Fold the linear element offset sum(off_i * stride_i) into the address.
-        shifted = False
-        linear = 0
-        for off, stride in zip(offsets, strides):
-            off = _check_scalar_int(off)
-            term = semantic.mul(off, stride, False)
-            linear = semantic.add(linear, term, False)
-            shifted = shifted or (type(off) is not int or off != 0)
-        if shifted:
-            src = semantic.add(src, linear, False)  # pointer + element offset
-    elem_ty = src.dtype.element_ty
-    addr = semantic.cast(src, int64)  # tt.ptr_to_int -> i64 byte address
-    # The element offset is already included in addr, so the new buffer starts
-    # at offset zero even when its pointer was shifted dynamically.
-    ty = buffer_type(sizes, elem_ty, space, strides, offset=0)
-    handle = semantic.builder.create_tla_bind(addr.handle, ty.to_ir(semantic.builder))
+    linear = 0
+    for off, stride in zip(offsets, strides):
+        off = _check_scalar_int(off)
+        linear = semantic.add(linear, semantic.mul(off, stride, False), False)
+    ty = buffer_type(sizes, src.dtype.element_ty, space, strides, offset=None)
+    handle = semantic.builder.create_tla_reinterpret_cast(
+        _bind(src, buffer_type((1, ), src.dtype.element_ty, space), semantic).handle,
+        semantic.to_tensor(linear).handle, list(sizes), list(strides), ty.to_ir(semantic.builder))
+    return buffer(handle, ty)
+
+
+def _bind(src, ty, semantic):
+    """Pointer memory as a memref via one hivm.hir.pointer_cast."""
+    handle = semantic.builder.create_tla_bind(semantic.cast(src, int64).handle, ty.to_ir(semantic.builder))
     return buffer(handle, ty)
 
 
@@ -103,12 +103,10 @@ def view(src, shape, strides=None, offsets=None, space="gm", _semantic=None):
         return _subview(src, sizes, steps, offsets, _semantic)
     if isinstance(src, tensor) and src.dtype.is_ptr():
         sizes = _shape(shape)
-        if strides is None:
-            strides = _row_major_strides(sizes)
-        else:
-            strides = _shape(strides)
-        if len(strides) != len(sizes):
-            raise ValueError("view strides must match buffer rank")
-        return _pointer_entry(src, sizes, strides, offsets, space, _semantic)
+        strides = _row_major_strides(sizes) if strides is None else _shape(strides)
+        offsets = (0, ) * len(sizes) if offsets is None else tuple(offsets)
+        if len(strides) != len(sizes) or len(offsets) != len(sizes):
+            raise ValueError("view strides and offsets must match buffer rank")
+        return _entry(src, sizes, strides, offsets, space, _semantic)
     raise TypeError("tla.view expects a tla.buffer or a pointer tensor, "
                     f"got {type(src).__name__}")
