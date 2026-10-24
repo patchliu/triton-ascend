@@ -86,6 +86,8 @@ def test_ir(output_dir=None):
     # one pointer entry for x_row + one per MHC-row o_row view.
     assert text.count("hivm.hir.pointer_cast") == 1 + SHAPE["mhc"], \
         "tla.view(ptr) x (1 x_row + mhc o_row)"
+    assert text.count("memref.reinterpret_cast") == 1 + SHAPE["mhc"], \
+        "tla.view(ptr) x (1 x_row + mhc o_row)"
     module = lower_offline(module, ctx, output_dir=output_dir)
     text = str(module)
     check_lowered_ir(text, loads=1, stores=SHAPE["mhc"], buffers=2)
