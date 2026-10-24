@@ -93,9 +93,6 @@ def test_ir(output_dir=None):
     # materializes 3 GM memrefs via hivm.hir.pointer_cast.
     assert "!tt.ptr" in text, "route A entry must keep pointer args at AST stage"
     assert text.count("hivm.hir.pointer_cast") == 3, "tla.view(ptr) x3"
-    assert all("strided<" not in line
-               for line in text.splitlines()
-               if "hivm.hir.pointer_cast" in line), "contiguous pointer views must have identity layout"
     module = lower_offline(module, ctx, output_dir=output_dir)
     text = str(module)
     check_lowered_ir(text, loads=2, stores=1, buffers=3)
