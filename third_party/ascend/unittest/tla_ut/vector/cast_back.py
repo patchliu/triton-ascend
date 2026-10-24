@@ -93,6 +93,7 @@ def test_ir(output_dir=None):
     # materializes 3 GM memrefs via hivm.hir.pointer_cast.
     assert "!tt.ptr" in text, "route A entry must keep pointer args at AST stage"
     assert text.count("hivm.hir.pointer_cast") == 3, "tla.view(ptr) x3"
+    assert text.count("memref.reinterpret_cast") == 3, "tla.view(ptr) x3"
     module = lower_offline(module, ctx, output_dir=output_dir)
     text = str(module)
     check_lowered_ir(text, loads=2, stores=1, buffers=3)

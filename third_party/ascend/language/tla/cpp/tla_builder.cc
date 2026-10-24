@@ -101,6 +101,24 @@ llvm::SmallVector<Value> toIndexValues(TLABuilder &self,
   return indexValues;
 }
 
+// Zero-offset row-major memrefs stay identity: the canonical form, and the
+// only layout PointerCastOp's LLVM lowering accepts. Subview/reinterpret
+// results keep strided layouts via the dynamic-offset branch below.
+MemRefLayoutAttrInterface
+tlaBufferLayout(MLIRContext *ctx, ArrayRef<int64_t> shape,
+                ArrayRef<int64_t> strides, std::optional<int64_t> offset) {
+  bool isIdentity = offset.has_value() && *offset == 0;
+  for (int64_t expectedStride = 1, i = shape.size(); i-- > 0;) {
+    if (shape[i] > 1 && strides[i] != expectedStride)
+      isIdentity = false;
+    expectedStride *= shape[i];
+  }
+  if (isIdentity)
+    return {};
+  return StridedLayoutAttr::get(ctx, offset.value_or(ShapedType::kDynamic),
+                                strides);
+}
+
 } // namespace
 
 void init_tla_builder(py::module &&m) {
@@ -408,8 +426,6 @@ void init_tla_builder(py::module &&m) {
              return op.getResult();
            },
            py::arg("src"), py::arg("out_elem_tag"), py::arg("out_lanes"))
-      // Buffer offset stays dynamic (None -> kDynamic) so folding never
-      // assumes an identity layout on address-carrying pointers.
       .def("create_tla_buffer_type",
            [](TLABuilder &self, const std::vector<int64_t> &shape,
               Type elementType, const std::string &space,
@@ -423,10 +439,8 @@ void init_tla_builder(py::module &&m) {
                throw std::invalid_argument(
                    "TLA buffer shape and strides must have the same rank");
              auto *ctx = self.getBuilder().getContext();
-             auto layout = StridedLayoutAttr::get(
-                 ctx, offset.value_or(ShapedType::kDynamic), strides);
              return MemRefType::get(
-                 shape, elementType, layout,
+                 shape, elementType, tlaBufferLayout(ctx, shape, strides, offset),
                  hivm::AddressSpaceAttr::get(ctx, *memorySpace));
            })
       .def("create_tla_alloc",
@@ -473,6 +487,30 @@ void init_tla_builder(py::module &&m) {
              return self
                  .create<memref::SubViewOp>(source, mixedOffsets, mixedSizes,
                                             mixedStrides)
+                 .getResult();
+           })
+      .def("create_tla_reinterpret_cast",
+           [](TLABuilder &self, Value source, Value offset,
+              const std::vector<int64_t> &sizes,
+              const std::vector<int64_t> &strides, Type resultType) -> Value {
+             if (!isa<MemRefType>(source.getType()) ||
+                 sizes.size() != strides.size())
+               throw std::invalid_argument(
+                   "TLA reinterpret_cast requires a memref source and matching "
+                   "sizes/strides");
+             if (!offset.getType().isIndex())
+               offset = self.create<arith::IndexCastOp>(
+                   self.getBuilder().getIndexType(), offset);
+             // resultType is strided<strides, offset: ?>: sizes/strides are
+             // static, only the linear offset is dynamic.
+             return self
+                 .create<memref::ReinterpretCastOp>(
+                     resultType, source, ValueRange{offset}, ValueRange{},
+                     ValueRange{},
+                     self.getBuilder().getDenseI64ArrayAttr(
+                         {ShapedType::kDynamic}),
+                     self.getBuilder().getDenseI64ArrayAttr(sizes),
+                     self.getBuilder().getDenseI64ArrayAttr(strides))
                  .getResult();
            })
       .def("create_hivm_load",
