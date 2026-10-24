@@ -14,6 +14,7 @@ target_link_libraries(triton-opt PRIVATE
   # MLIR core
   MLIROptLib
   MLIRPass
+  MLIRFuncInlinerExtension
   MLIRRegisterAllDialects
   MLIRRegisterAllPasses
   MLIRTransforms

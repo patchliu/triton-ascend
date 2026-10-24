@@ -219,6 +219,7 @@ if(TRITON_BUILD_PYTHON_MODULE)
     MLIRGPUToGPURuntimeTransforms
     MLIRGPUTransforms
     MLIRIR
+    MLIRFuncInlinerExtension
     MLIRControlFlowToLLVM
     MLIRBytecodeWriter
     MLIRPass

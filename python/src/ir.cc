@@ -9,6 +9,7 @@
 #include "mlir/Bytecode/BytecodeWriter.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
+#include "mlir/Dialect/Func/Extensions/InlinerExtension.h"
 #include "mlir/Dialect/LLVMIR/LLVMAttrs.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/LLVMIR/Transforms/InlinerInterfaceImpl.h"
@@ -370,6 +371,7 @@ void init_triton_ir(py::module &&m) {
                     LLVM::LLVMDialect, mlir::ub::UBDialect,
                     mlir::triton::gluon::GluonDialect>();
     mlir::LLVM::registerInlinerInterface(registry);
+    mlir::func::registerInlinerExtension(registry);
     registerBuiltinDialectTranslation(registry);
     registerLLVMDialectTranslation(registry);
     mlir::LLVM::registerInlinerInterface(registry);
