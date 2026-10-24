@@ -23,11 +23,10 @@ This does not define a device launcher ABI. Standard Triton ASTSource accepts
 pointer strings; this entry point accepts tla.buffer_type without creating
 pointer tensors or changing Triton's global type parser.
 
-The TLA wiring (``TLA_WITH_DISPATCH`` merged into the ``WITH_DISPATCH``
-registry, ``tla_setup_unified_builder`` mounted in ``CodeGenerator.__init__``)
-is baked into the wheel by the build-time triton-ascend patch, so the plain
-patched ``CodeGenerator`` already handles ``with tla.scope.simd():`` and the
-TLA builder methods; no TLA-specific subclass or runtime dispatch is needed.
+The TLA wiring is self-contained: ``tla.builder.setup_unified_builder``
+(mounted in ``CodeGenerator.__init__`` by the patch) merges ``TLA_WITH_DISPATCH``
+into the ``WITH_DISPATCH`` registry and attaches the TLA builder methods, so
+the plain patched ``CodeGenerator`` already handles ``with tla.scope.simd():``.
 """
 import re
 from collections import namedtuple

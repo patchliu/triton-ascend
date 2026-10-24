@@ -37,6 +37,12 @@ __all__ = [
 
 def setup_unified_builder(main_builder, ascend_builder):
     """Set up a unified builder interface by attaching methods from specialized builders."""
+    # Mounted by the triton-ascend patch in CodeGenerator.__init__, so it runs
+    # before any kernel body; registering the 'with' handlers here keeps TLA
+    # self-contained (no build-time patch to community code_generator.py).
+    from .dispatch import register_with_dispatch
+
+    register_with_dispatch()
     main_builder._ascend_builder = ascend_builder
     ascend_methods = [
         'create_tla_barrier',
