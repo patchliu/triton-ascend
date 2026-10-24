@@ -129,6 +129,7 @@ endif()
 add_triton_plugin(TritonAscend
   ${CMAKE_CURRENT_SOURCE_DIR}/triton_ascend.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/ascend_ir.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/language/tla/cpp/tla_builder.cc
   LINK_LIBS
   TritonToGraph
   TritonToLinalg

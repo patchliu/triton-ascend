@@ -520,19 +520,21 @@ index c572f81e3..4b4332368 100644
              self.semantic = TritonSemantic(self.builder)
  
          self.name_loc_as_prefix = None
-@@ -309,6 +333,19 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -309,6 +333,21 @@ class CodeGenerator(ast.NodeVisitor):
          self.begin_line = begin_line - 1
          self.builder.set_loc(file_name, begin_line, 0)
          self.builder.options = options
 +
-+        # Set up unified builder interface with methods from specialized builders
 +        compile_mode = "simt" if getattr(options, "compile_mode", "simd") == "simt_only" else "simd"
 +        self.ascend_builder = ascend_ir.ascendnpu_ir_builder(context, getattr(options, "arch", ""),
 +                                                             compile_mode=compile_mode)
 +        self.ascend_builder.set_loc(file_name, begin_line, 0)
 +        setup_unified_builder(self.builder, self.ascend_builder)
-+        # Dual mount: cann and TLA builder method lists are disjoint; both required.
-+        tla_setup_unified_builder(self.builder, self.ascend_builder)
++        # TLA methods need the TLABuilder subclass (scope returns (op, body)).
++        self.tla_builder = ascend_ir.tla_builder(context, getattr(options, "arch", ""),
++                                                 compile_mode=compile_mode)
++        self.tla_builder.set_loc(file_name, begin_line, 0)
++        tla_setup_unified_builder(self.builder, self.tla_builder)
 +        self.buffer_builder = buffer_ir.buffer_builder(context)
 +        self.buffer_builder.set_loc(file_name, begin_line, 0)
 +        setup_unified_builder_with_buffer_builder(self.builder, self.buffer_builder)
@@ -540,7 +542,7 @@ index c572f81e3..4b4332368 100644
          # dict of functions provided by the backend. Below are the list of possible functions:
          # Convert custom types not natively supported on HW.
          # convert_custom_types(input_tensor, dtype, fp_downcast_rounding=None, _builder=None)
-@@ -451,17 +488,19 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -451,17 +490,19 @@ class CodeGenerator(ast.NodeVisitor):
          self.lscope[name] = value
          self.local_defs[name] = value
  
@@ -566,7 +568,7 @@ index c572f81e3..4b4332368 100644
  
      def _find_carries(self, node, liveins, ignore: set[str] = set()):
          # create loop body block
-@@ -980,6 +1019,26 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -980,6 +1021,26 @@ class CodeGenerator(ast.NodeVisitor):
                  return self.visit(node.orelse)
  
      def visit_With(self, node):
@@ -593,7 +595,7 @@ index c572f81e3..4b4332368 100644
          # Lower `with` statements by constructing context managers and calling their enter/exit hooks
          # Instantiate each context manager with builder injection
          cm_list = []
-@@ -1147,7 +1206,7 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1147,7 +1208,7 @@ class CodeGenerator(ast.NodeVisitor):
          flatten = False
          warp_specialize = False
          disable_licm = False
@@ -602,7 +604,7 @@ index c572f81e3..4b4332368 100644
              iterator = IteratorClass(*iter_args, **iter_kwargs)
              # visit iterator arguments
              # note: only `range` iterator is supported now
-@@ -1224,7 +1283,9 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1224,7 +1285,9 @@ class CodeGenerator(ast.NodeVisitor):
              if warp_specialize:
                  for_op.set_attr("tt.warp_specialize", self.builder.get_unit_attr())
              if disable_licm:
@@ -613,7 +615,7 @@ index c572f81e3..4b4332368 100644
  
              self.scf_stack.append(node)
              for_op_body = for_op.get_body(0)
-@@ -1286,7 +1347,7 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1286,7 +1349,7 @@ class CodeGenerator(ast.NodeVisitor):
          args = inspect.getcallargs(fn.fn, *args, **kwargs)
          args = [args[name] for name in fn.arg_names]
          for i, arg in enumerate(args):
@@ -622,7 +624,7 @@ index c572f81e3..4b4332368 100644
                  args[i] = language.core.constexpr(arg)
          args_cst = find_paths_if(args, lambda _, x: _is_constexpr(x))
          args_cst = {path: get_iterable_path(args, path) for path in args_cst}
-@@ -1340,6 +1401,11 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1340,6 +1403,11 @@ class CodeGenerator(ast.NodeVisitor):
              return self.call_JitFunction(fn, args, kws)
          if (hasattr(fn, '__self__') and _is_triton_value(fn.__self__)) or language.core.is_builtin(fn) or isinstance(
                  fn, ConstexprFunction):
@@ -634,7 +636,7 @@ index c572f81e3..4b4332368 100644
              extra_kwargs = dict()
  
              if isinstance(fn, ConstexprFunction):
-@@ -1355,6 +1421,9 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1355,6 +1423,9 @@ class CodeGenerator(ast.NodeVisitor):
                  # builtin functions return plain tuples for readability
                  if isinstance(ret, tuple):
                      ret = language.tuple(ret)
@@ -644,7 +646,7 @@ index c572f81e3..4b4332368 100644
                  return ret
              except Exception as e:
                  if knobs.compilation.front_end_debugging:
-@@ -1594,6 +1663,7 @@ class CodeGenerator(ast.NodeVisitor):
+@@ -1594,6 +1665,7 @@ class CodeGenerator(ast.NodeVisitor):
          ttgl.static_print: static_executor(print),
          int: static_executor(int),
          len: static_executor(len),
