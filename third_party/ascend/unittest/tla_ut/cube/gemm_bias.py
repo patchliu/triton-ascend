@@ -73,7 +73,8 @@ def constexprs():
 
 
 @triton.jit
-def gemm_bias_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr, BIAS: tl.constexpr):
+def gemm_bias_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr,
+                     BIAS: tl.constexpr):
     rows = tl.arange(0, M)
     cols = tl.arange(0, N)
     a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])
@@ -117,7 +118,7 @@ def _launch():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_bias[(1, )](A, B, C, **constexprs())
+    gemm_bias[(1,)](A, B, C, enable_tla_mode=True, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float() + s["BIAS"])
 
@@ -127,7 +128,7 @@ def _launch_triton():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_bias_triton[(1, )](A, B, C, **constexprs())
+    gemm_bias_triton[(1,)](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float() + s["BIAS"])
 

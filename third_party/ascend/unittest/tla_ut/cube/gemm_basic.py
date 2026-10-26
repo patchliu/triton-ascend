@@ -58,9 +58,9 @@ def constexprs():
 def gemm_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr):
     rows = tl.arange(0, M)
     cols = tl.arange(0, N)
-    a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])  # (M, K)
-    b = tl.load(B_ptr + cols[:, None] * K + rows[None, :])  # (N, K) -> load B(K, N) transposed
-    c = tl.sum(a[:, :, None] * b[None, :, :], axis=1)  # (M, N) f32 accumulate
+    a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])   # (M, K)
+    b = tl.load(B_ptr + cols[:, None] * K + rows[None, :])   # (N, K) -> load B(K, N) transposed
+    c = tl.sum(a[:, :, None] * b[None, :, :], axis=1)        # (M, N) f32 accumulate
     tl.store(C_ptr + rows[:, None] * N + cols[None, :], c)
 
 
@@ -90,7 +90,7 @@ def _launch():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_basic[(1, )](A, B, C, **constexprs())
+    gemm_basic[(1,)](A, B, C, enable_tla_mode=True, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float())
 
@@ -100,7 +100,7 @@ def _launch_triton():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_triton[(1, )](A, B, C, **constexprs())
+    gemm_triton[(1,)](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float())
 
