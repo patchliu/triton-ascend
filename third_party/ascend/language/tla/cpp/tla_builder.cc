@@ -432,6 +432,14 @@ void init_tla_builder(py::module &&m) {
               const std::vector<int64_t> &strides,
               std::optional<int64_t> offset) -> Type {
              auto memorySpace = hivm::symbolizeAddressSpace(space);
+             if (!memorySpace) {
+               // TLA frontend names -> HIVM #hivm.address_space mnemonics.
+               static const llvm::StringMap<llvm::StringRef> kTlaToHivm = {
+                   {"l1", "cbuf"}, {"l0a", "ca"}, {"l0b", "cb"}, {"l0c", "cc"}};
+               auto it = kTlaToHivm.find(space);
+               if (it != kTlaToHivm.end())
+                 memorySpace = hivm::symbolizeAddressSpace(it->second);
+             }
              if (!memorySpace)
                throw std::invalid_argument("unknown TLA address space: " +
                                            space);
@@ -527,9 +535,69 @@ void init_tla_builder(py::module &&m) {
                throw std::invalid_argument("TLA DMA requires memref operands");
              self.create<hivm::StoreOp>(TypeRange{}, src, dst);
            })
+      // GM(ND) -> L1(NZ): dst_continuous is required by the mte2 library-call
+      // path that nd2nz lowers into.
+      .def("create_hivm_nd2nz",
+           [](TLABuilder &self, Value src, Value dst) {
+             if (!isa<MemRefType>(src.getType()) ||
+                 !isa<MemRefType>(dst.getType()))
+               throw std::invalid_argument("TLA DMA requires memref operands");
+             self.create<hivm::ND2NZOp>(TypeRange{}, src, dst,
+                                        self.getBuilder().getUnitAttr());
+           },
+           py::arg("src"), py::arg("dst"))
+      // L0C -> GM/UB. The base create_fixpipe (ascend_ir.cc) forces a
+      // RankedTensorType src; TLA buffers are memrefs, so route through the
+      // FixpipeOp memref builder (dma_mode: "nz2nd"/"normal").
+      .def("create_hivm_fixpipe",
+           [](TLABuilder &self, Value src, Value dst, std::string &dma_mode) {
+             if (!isa<MemRefType>(src.getType()) ||
+                 !isa<MemRefType>(dst.getType()))
+               throw std::invalid_argument("TLA DMA requires memref operands");
+             auto &builder = self.getBuilder();
+             auto *ctx = builder.getContext();
+             auto dmaEnum = hivm::symbolizeFixpipeDMAMode(dma_mode);
+             if (!dmaEnum)
+               throw std::invalid_argument("unknown fixpipe dma_mode: " +
+                                           dma_mode);
+             auto dmaAttr = hivm::FixpipeDMAModeAttr::get(ctx, *dmaEnum);
+             auto dualAttr = hivm::FixpipeDualDstModeAttr::get(
+                 ctx, hivm::FixpipeDualDstMode::NO_DUAL);
+             auto quantAttr = hivm::FixpipePreQuantModeAttr::get(
+                 ctx, hivm::FixpipePreQuantMode::NO_QUANT);
+             auto reluAttr = hivm::FixpipePreReluModeAttr::get(
+                 ctx, hivm::FixpipePreReluMode::NO_RELU);
+             self.create<hivm::FixpipeOp>(
+                 TypeRange{}, src, dst, dmaAttr, dualAttr, nullptr, quantAttr,
+                 reluAttr, builder.getBoolAttr(false));
+           },
+           py::arg("src"), py::arg("dst"), py::arg("dma_mode"))
+      // C = A x B (+C): A=(M,K)/B=(K,N) in L1, C in L0C (f32/i32).
+      // init_condition clears L0C first (clear_accum), real_m/k/n are the
+      // actual tile sizes (arith.constant index); transpose_b sets UnitAttr.
+      .def("create_hivm_mmadl1",
+           [](TLABuilder &self, Value a, Value b, Value c, bool init_condition,
+              int64_t real_m, int64_t real_k, int64_t real_n, bool transpose_b) {
+             auto &builder = self.getBuilder();
+             auto loc = self.getLastLoc();
+             auto init = builder.create<arith::ConstantOp>(
+                 loc, builder.getI1Type(), builder.getBoolAttr(init_condition));
+             auto m = builder.create<arith::ConstantIndexOp>(loc, real_m);
+             auto k = builder.create<arith::ConstantIndexOp>(loc, real_k);
+             auto n = builder.create<arith::ConstantIndexOp>(loc, real_n);
+             auto bTrans = transpose_b ? builder.getUnitAttr() : UnitAttr{};
+             self.create<hivm::MmadL1Op>(
+                 TypeRange{}, a, b, init, m, k, n, c,
+                 /*per_channel_bias=*/Value{}, /*a_transpose=*/UnitAttr{},
+                 /*b_transpose=*/bTrans, /*enable_HF32=*/UnitAttr{},
+                 /*enable_I4=*/UnitAttr{});
+           },
+           py::arg("a"), py::arg("b"), py::arg("c"),
+           py::arg("init_condition"), py::arg("real_m"), py::arg("real_k"),
+           py::arg("real_n"), py::arg("transpose_b"))
       .def("create_scope_op",
            [](TLABuilder &self, py::dict &scopeAttrs,
-              std::vector<Type> resultTypes) -> std::pair<OpState, Block *> {
+              std::vector<Type> resultTypes) -> OpState {
              llvm::SmallVector<NamedAttribute> attrs;
              for (auto item : scopeAttrs) {
                std::string key = py::cast<std::string>(item.first);
@@ -543,9 +611,25 @@ void init_tla_builder(py::module &&m) {
              // If the region was left empty, create the entry block.
              if (region.empty())
                region.emplaceBlock();
-             Block *bodyBlock = &region.front();
-             return {OpState(scopeOp), bodyBlock};
-           });
+             return OpState(scopeOp);
+           })
+      // Returns a non-owning reference to the scope entry block.  pybind11
+      // wraps Block with a unique_ptr holder, so a bare Block* under the
+      // default automatic policy would delete the block when the Python
+      // wrapper is GC'd; reference keeps the block alive in the IR.
+      .def("get_scope_entry_block",
+           [](TLABuilder &self, OpState op) -> Block * {
+             return &op->getRegion(0).front();
+           },
+           py::return_value_policy::reference)
+      // Set an attribute on an existing operation. module.get_function is not
+      // usable for the ttadapter entry: triton_to_linalg lowers it from
+      // triton::FuncOp to mlir func::FuncOp, so lookupSymbol<FuncOp> misses it
+      // (module.walk returns the operation itself).
+      .def("set_op_attr",
+           [](TLABuilder &self, Operation *op, std::string &name,
+              Attribute &attr) -> void { op->setAttr(name, attr); },
+           py::arg("op"), py::arg("name"), py::arg("attr"));
 
   // Minimal func::FuncOp exposure for frontends that outline functions.
   py::class_<func::FuncOp, OpState>(m, "func_op", py::module_local())

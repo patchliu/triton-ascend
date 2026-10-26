@@ -22,6 +22,15 @@ from triton.language.core import builtin
 from .core import buffer
 
 
+def _fixpipe_dma_mode(dst):
+    # TODO: inferring dma_mode from dst rank is a v1 shortcut. Replace it with
+    # an explicit fixpipe API that takes dma_mode and in-flight knobs (e.g.
+    # quantization) to enable per-copy optimizations.
+    # Match InsertLoadStoreForMixCV::getInsertedFixpipeDmaMode: a 2D ND dst
+    # uses NZ2ND (drop NZ to ND); a 4D fractal dst keeps NZ (NZ2NZ).
+    return "nz2nd" if len(dst.shape) == 2 else "normal"
+
+
 @builtin
 def copy(src, dst, _semantic=None):
     if not isinstance(src, buffer) or not isinstance(dst, buffer):
@@ -32,5 +41,9 @@ def copy(src, dst, _semantic=None):
         _semantic.builder.create_hivm_load(src.handle, dst.handle)
     elif (src.space, dst.space) == ("ub", "gm"):
         _semantic.builder.create_hivm_store(src.handle, dst.handle)
+    elif (src.space, dst.space) == ("gm", "l1"):
+        _semantic.builder.create_hivm_nd2nz(src.handle, dst.handle)
+    elif src.space == "l0c":
+        _semantic.builder.create_hivm_fixpipe(src.handle, dst.handle, _fixpipe_dma_mode(dst))
     else:
-        raise ValueError("tla.copy currently supports only GM->UB and UB->GM")
+        raise ValueError(f"tla.copy unsupported space pair {(src.space, dst.space)}")
