@@ -49,6 +49,7 @@ def setup_unified_builder(main_builder, ascend_builder):
         'create_tla_expand_shape',
         'create_hivm_load',
         'create_hivm_store',
+        'create_hivm_debug',
         'create_hivm_nd2nz',
         'create_hivm_fixpipe',
         'create_hivm_mmadl1',

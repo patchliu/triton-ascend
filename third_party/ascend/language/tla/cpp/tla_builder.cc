@@ -579,6 +579,18 @@ void init_tla_builder(py::module &&m) {
                throw std::invalid_argument("TLA DMA requires memref operands");
              self.create<hivm::StoreOp>(TypeRange{}, src, dst);
            })
+      // Print at the buffer stage: hivm.hir.debug accepts memref/scalar
+      // operands directly, no tt.print detour.
+      .def(
+          "create_hivm_debug",
+          [](TLABuilder &self, std::string debugtype, std::string prefix,
+             bool hex, Value value) {
+            if (!value)
+              throw std::invalid_argument("TLA debug requires a value operand");
+            self.create<hivm::DebugOp>(debugtype, prefix, hex, value);
+          },
+          py::arg("debugtype"), py::arg("prefix"), py::arg("hex"),
+          py::arg("value"))
       // GM(ND) -> L1(NZ): dst_continuous is required by the mte2 library-call
       // path that nd2nz lowers into.
       .def(
