@@ -36,6 +36,8 @@ from triton.language.core import builtin
 
 from .core import buffer
 from .core import buffer_access
+from .core import is_ub
+from .core import space_of
 
 __all__ = ["device_assert", "device_print"]
 
@@ -67,14 +69,14 @@ def _print_arg(semantic, builder, arg):
     """
     if isinstance(arg, buffer_access):
         src = arg.buffer
-        if src.space != "ub":
-            raise RuntimeError(f"tla.device_print: only UB values are supported, got {src.space}")
+        if not is_ub(src):
+            raise RuntimeError(f"tla.device_print: only UB values are supported, got {space_of(src)}")
         offsets = [semantic.to_tensor(i).handle for i in arg.indices]
         rank = len(src.shape)
         return builder.create_tla_subview(src.handle, offsets, [1] * rank, [1] * rank)
     if isinstance(arg, buffer):
-        if arg.space != "ub":
-            raise RuntimeError(f"tla.device_print: only UB values are supported, got {arg.space}")
+        if not is_ub(arg):
+            raise RuntimeError(f"tla.device_print: only UB values are supported, got {space_of(arg)}")
         return arg.handle
     return semantic.to_tensor(arg).handle
 
