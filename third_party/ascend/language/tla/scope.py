@@ -55,13 +55,9 @@ class scope:
 class simd(scope):
     """``with tla.scope.simd():`` -- SIMD vector-function region (vector core).
 
-    A manual vector function: the bishengir HFusion pipeline's outline-scope
-    (outlineMarkedScopesOnly=true) extracts it into ``func.func`` +
-    ``func.call``. ``hivm.vector_function`` + ``no_inline`` +
-    ``hivm.func_core_type<AIV>`` reproduce the attrs of a frontend-outlined VF
-    so the HIVM stage dispatches it; ``vector_mode`` marks the manual-VF scope
-    for the HFusion pass pipeline (HFusionVectorizeOps, AutoVectorize). No
-    ``hivm.vf_mode`` is set, keeping the SIMT path away.
+    Emitted as a manual vector function: the bishengir ``outline-scope`` pass
+    extracts this marked scope into ``func.func`` + ``func.call``. See
+    :meth:`mlir_attrs` for the role of each stamped attribute.
     """
 
     core_mode = "vector"
@@ -74,6 +70,7 @@ class simd(scope):
             "outline": builder.get_unit_attr(),
             "vector_mode": builder.get_string_attr("vec"),
             "hivm.func_core_type": builder.parse_attr("#hivm.func_core_type<AIV>"),
+            "hivm.vf_mode": builder.parse_attr("#hivm.vf_mode<SIMD>"),
             "hivm.vector_function": builder.get_unit_attr(),
         })
         return attrs
