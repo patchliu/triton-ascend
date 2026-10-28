@@ -14,7 +14,10 @@ Triton references live in the same case file (`TRITON_CAST_BACK OK`, ...).
 
 ## Layout
 
-- `vector/` — SIMD/AIV ops (current 7 cases).
+- `vector/` — SIMD/AIV ops (per-op cases, the add/cmp 3-in-1, and
+tilelang-derived ports: `vecadd_simd.py`, `per_token_amax.py`).
+- `sync/` — synchronization: `sync_intra.py` (pipeline hand sync) and
+  `sync_inter.py` (cube -> vector flag handoff).
 - `utils/` — shared helpers (`tla_test_utils.py`).
 - `cube/` `mix/` — future matmul / mixed ops, same template.
 

@@ -230,6 +230,30 @@ void init_tla_builder(py::module &&m) {
           },
           py::arg("kind"), py::arg("lhs"), py::arg("rhs"), py::arg("mask"))
       .def(
+          "create_simd_vec_scalar",
+          [](TLABuilder &self, std::string &kind, Value &vec, Value &scalar,
+             Value &mask) -> Value {
+            auto resTy = vec.getType();
+            if (kind == "adds") {
+              return self.create<hivmave::VFAddsOp>(resTy, vec, scalar, mask)
+                  .getResult();
+            }
+            if (kind == "muls") {
+              return self.create<hivmave::VFMulsOp>(resTy, vec, scalar, mask)
+                  .getResult();
+            }
+            if (kind == "maxs") {
+              return self.create<hivmave::VFMaxsOp>(resTy, vec, scalar, mask)
+                  .getResult();
+            }
+            if (kind == "mins") {
+              return self.create<hivmave::VFMinsOp>(resTy, vec, scalar, mask)
+                  .getResult();
+            }
+            throw std::invalid_argument("unknown vector-scalar kind: " + kind);
+          },
+          py::arg("kind"), py::arg("vec"), py::arg("scalar"), py::arg("mask"))
+      .def(
           "create_simd_vfma",
           [](TLABuilder &self, Value &acc, Value &lhs, Value &rhs,
              Value &mask) -> Value {

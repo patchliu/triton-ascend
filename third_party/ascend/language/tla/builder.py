@@ -62,6 +62,7 @@ def setup_unified_builder(main_builder, ascend_builder):
         'create_simd_vlds',
         'create_simd_vsts',
         'create_simd_binary',
+        'create_simd_vec_scalar',
         'create_simd_unary',
         'create_simd_vfma',
         'create_simd_vreduce',
