@@ -377,6 +377,10 @@ void init_tla_builder(py::module &&m) {
               return self.create<hivmave::VFRsqrtOp>(resTy, src, mask)
                   .getResult();
             }
+            if (kind == "exp") {
+              return self.create<hivmave::VFExpOp>(resTy, src, mask)
+                  .getResult();
+            }
             throw std::invalid_argument("unknown unary kind: " + kind);
           },
           py::arg("kind"), py::arg("src"), py::arg("mask"))
