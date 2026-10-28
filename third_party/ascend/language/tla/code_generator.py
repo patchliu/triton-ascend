@@ -42,7 +42,6 @@ def handle_scope_with(generator, node):
 
     with enter_sub_region(generator):
         attrs = withitem_class.mlir_attrs(generator.builder)
-        attrs["tla.core_mode"] = generator.builder.get_string_attr(withitem_class.core_mode)
         scope_op = generator.builder.create_scope_op(attrs, [])
         body = generator.builder.get_scope_entry_block(scope_op)
         generator.builder.set_insertion_point_to_start(body)

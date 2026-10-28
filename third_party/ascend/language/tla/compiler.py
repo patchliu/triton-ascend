@@ -114,17 +114,19 @@ def _kernel_entries(module):
 
 
 def infer_func_core_type(module):
-    """Infer AIC/AIV/MIX from scopes in a single-kernel module."""
+    """Infer AIC/AIV/MIX from scopes in a single-kernel module.
+
+    The scope classes stamp ``#hivm.tcore_type<...>`` on the emitted
+    ``scope.scope`` ops (see :meth:`tla.scope.mlir_attrs`); the binding
+    exposes no generic attribute reader, so the printed module is parsed.
+    VECTOR -> AIV, CUBE -> AIC.
+    """
+    text = str(module)
     core_types = set()
-
-    def collect_scope(op):
-        if op.get_name() != "scope.scope":
-            return
-        core_type = {"cube": "AIC", "vector": "AIV"}.get(op.get_str_attr("tla.core_mode"))
-        if core_type is not None:
-            core_types.add(core_type)
-
-    module.walk(collect_scope)
+    if "#hivm.tcore_type<CUBE>" in text:
+        core_types.add("AIC")
+    if "#hivm.tcore_type<VECTOR>" in text:
+        core_types.add("AIV")
     if "AIC" in core_types and "AIV" in core_types:
         return "MIX"
     if "AIC" in core_types:
