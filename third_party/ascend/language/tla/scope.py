@@ -19,18 +19,19 @@
 # SOFTWARE.
 """Core-mode scopes for TLA (``with tla.scope.simd():``).
 
-A scope marks a block of register ops (``simd.*`` on the vector core) that the
-compiler emits as an inline ``scope.scope`` carrying the core-mode markers; the
-bishengir ``outline-scope`` pass extracts the marked SIMD scope into the
+A scope marks a block of ops (``simd.*`` on the vector core) that the compiler
+emits as an inline ``scope.scope`` carrying the core-mode markers; the
+bishengir ``outline-scope`` pass extracts marked SIMD scopes into the
 ``func.func`` + ``func.call`` that the HIVM stage consumes.
 
-``tla.scope.simd()`` and ``tla.scope.cube()`` are the entry points; each is a
-context-manager class (the core mode is fixed on the class), so the compiler
-dispatch table keys off the class object itself. Each class defines
-``mlir_attrs``, the attribute set stamped on the emitted ``scope.scope``.
+``tla.scope.vector()``, ``tla.scope.simd()`` and ``tla.scope.cube()`` are the
+entry points; each is a context-manager class (the core mode is fixed on the
+class), so the compiler dispatch table keys off the class object itself. Each
+class defines ``mlir_attrs``, the attribute set stamped on the emitted
+``scope.scope``.
 """
 
-__all__ = ["scope", "simd", "cube"]
+__all__ = ["scope", "vector", "simd", "cube"]
 
 
 class scope:
@@ -50,6 +51,20 @@ class scope:
     def mlir_attrs(cls, builder):
         """Attributes stamped on the emitted ``scope.scope`` op."""
         return {"hivm.tcore_type": builder.parse_attr("#hivm.tcore_type<VECTOR>")}
+
+
+class vector(scope):
+    """``with tla.scope.vector():`` -- vector-core region for non-SIMD ops.
+
+    A vector scope is the vector core's inline region: it hosts non-SIMD
+    vector-core ops (``tla.copy`` GM<->UB, control flow) and can nest
+    :class:`simd` scopes for the register work. Only ``hivm.tcore_type<VECTOR>``
+    is stamped (no VF markers), so ``outline-scope`` never extracts it;
+    ``InlineScope(forceInline=true)`` folds it back at the end of the HIVM
+    pipeline.
+    """
+
+    core_mode = "vector"
 
 
 class simd(scope):
@@ -91,5 +106,6 @@ class cube(scope):
 
 
 # ``tla.scope`` resolves as the namespace holding the fixed-core-mode classes.
+scope.vector = vector
 scope.simd = simd
 scope.cube = cube
