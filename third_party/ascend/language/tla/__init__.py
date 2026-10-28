@@ -47,6 +47,9 @@ from . import simd
 # Cube-core ops (``mmad``/``tla.copy`` L1/L0C routes).
 from . import cube
 
+# Explicit pipeline / global synchronization.
+from . import sync
+
 __all__ = [
     "buffer",
     "buffer_type",
@@ -76,4 +79,7 @@ __all__ = [
 
     # cube ops
     "cube",
+
+    # explicit synchronization
+    "sync",
 ]

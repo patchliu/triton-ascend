@@ -39,6 +39,12 @@ def setup_unified_builder(main_builder, ascend_builder):
     """Set up a unified builder interface by attaching methods from specialized builders."""
     main_builder._ascend_builder = ascend_builder
     ascend_methods = [
+        'create_tla_barrier',
+        'create_tla_set_flag',
+        'create_tla_wait_flag',
+        'create_tla_sync_all',
+        'create_tla_block_set_flag',
+        'create_tla_block_wait_flag',
         'create_tla_buffer_type',
         'create_tla_vector_type',
         'create_tla_alloc',
