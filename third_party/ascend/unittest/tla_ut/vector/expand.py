@@ -12,7 +12,6 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # tests/
 import torch
-import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
@@ -24,7 +23,7 @@ SHAPE = dict(tmax=8, h=256, mhc=2, h_blk=128, ns=2, cores=4)
 SIGNATURE = {"X_ptr": "*bf16", "O_ptr": "*bf16", "num_tokens": "i32"}
 
 
-@triton.jit
+@tla.jit
 def expand_to_mhc_fwd(X_ptr, O_ptr, num_tokens, TMAX: tl.constexpr, H: tl.constexpr, MHC: tl.constexpr,
                       H_BLK: tl.constexpr, NS: tl.constexpr, CORES: tl.constexpr):
     tl.static_assert(H > 0 and H % H_BLK == 0 and H_BLK % 128 == 0,
@@ -67,7 +66,7 @@ def constexprs():
 # ---- standard Triton reference (same semantics/shape) ----
 
 
-@triton.jit
+@tla.jit
 def expand_triton(X_ptr, O_ptr, TMAX: tl.constexpr, H: tl.constexpr, MHC: tl.constexpr):
     pid = tl.program_id(0)
     for task in range(pid, TMAX * (H // 128), tl.num_programs(0)):
@@ -98,7 +97,7 @@ def _launch():
     s = SHAPE
     X = torch.randn(s["tmax"], s["h"], dtype=torch.bfloat16, device="npu")
     O = torch.full((s["tmax"], s["mhc"], s["h"]), -1.0, dtype=torch.bfloat16, device="npu")
-    expand_to_mhc_fwd[(s["cores"], )](X, O, s["tmax"], enable_tla_mode=True, **constexprs())
+    expand_to_mhc_fwd[(s["cores"], )](X, O, s["tmax"], **constexprs())
     torch.npu.synchronize()
     ref = X.unsqueeze(1).expand(s["tmax"], s["mhc"], s["h"])
     return O, ref

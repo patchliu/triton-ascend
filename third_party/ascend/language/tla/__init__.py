@@ -30,6 +30,8 @@ Exports: ``alloc_buffer``/``alloc`` (on-chip buffer + versions),
 ``simd`` (vector-register ops), ``annotate_buffer_versions``.
 """
 
+import triton
+
 from .core import buffer, buffer_type, vector, vector_type
 from .scope import scope
 from .alloc import alloc_buffer, alloc
@@ -49,6 +51,51 @@ from . import cube
 
 # Explicit pipeline / global synchronization.
 from . import sync
+
+
+def jit(fn=None, **kwargs):
+    """Thin wrapper over ``triton.jit`` that marks the kernel as a TLA kernel.
+
+    Marked kernels automatically get ``enable_tla_mode=True`` injected into
+    their launch kwargs (see ``_install_tla_option_injection``), so callers do
+    not need to pass the option explicitly.  Supports the same call forms as
+    ``@triton.jit``: bare (``@tla.jit``) or with arguments
+    (``@tla.jit(do_not_specialize=[...])``).
+    """
+
+    def _wrap(f):
+        jf = triton.jit(f, **kwargs)
+        jf._is_tla_kernel = True
+        return jf
+
+    return _wrap(fn) if fn is not None else _wrap
+
+
+def _install_tla_option_injection():
+    """Inject ``enable_tla_mode=True`` into launches of ``@tla.jit`` kernels.
+
+    The compile flow snapshots ``metadata = {**options.__dict__}`` before
+    codegen, so TLA mode cannot be auto-enabled from codegen time.  Instead we
+    patch ``JITFunction.run`` so TLA-marked kernels carry the option in their
+    launch kwargs before ``parse_options`` builds the options object.  Non-TLA
+    kernels (no ``_is_tla_kernel`` marker) are untouched.
+    """
+    from triton.runtime.jit import JITFunction
+
+    if getattr(JITFunction, "_tla_inject_applied", False):
+        return
+    _original_run = JITFunction.run
+
+    def _run(self, *args, grid, warmup, **kwargs):
+        if getattr(self, "_is_tla_kernel", False):
+            kwargs.setdefault("enable_tla_mode", True)
+        return _original_run(self, *args, grid=grid, warmup=warmup, **kwargs)
+
+    JITFunction.run = _run
+    JITFunction._tla_inject_applied = True
+
+
+_install_tla_option_injection()
 
 __all__ = [
     "buffer",
@@ -83,4 +130,7 @@ __all__ = [
 
     # explicit synchronization
     "sync",
+
+    # kernel decorator (marks a kernel as TLA and auto-enables TLA mode)
+    "jit",
 ]

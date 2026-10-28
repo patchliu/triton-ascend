@@ -19,7 +19,6 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # tests/
 import torch
-import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
@@ -32,7 +31,7 @@ SHAPE = dict(M=64, N=64, K=64, BIAS=1.0, FLAG=0)
 SIGNATURE = {"A_ptr": "*fp16", "B_ptr": "*fp16", "C_ptr": "*fp32"}
 
 
-@triton.jit
+@tla.jit
 def gemm_bias(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr, BIAS: tl.constexpr,
               FLAG: tl.constexpr):
     tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0, "M/N/K must be multiples of 16 (cube tile)")
@@ -72,9 +71,8 @@ def constexprs():
 # ---- standard Triton reference (same semantics/shape) ----
 
 
-@triton.jit
-def gemm_bias_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr,
-                     BIAS: tl.constexpr):
+@tla.jit
+def gemm_bias_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr, BIAS: tl.constexpr):
     rows = tl.arange(0, M)
     cols = tl.arange(0, N)
     a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])
@@ -118,7 +116,7 @@ def _launch():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_bias[(1,)](A, B, C, enable_tla_mode=True, **constexprs())
+    gemm_bias[(1, )](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float() + s["BIAS"])
 
@@ -128,7 +126,7 @@ def _launch_triton():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_bias_triton[(1,)](A, B, C, **constexprs())
+    gemm_bias_triton[(1, )](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float() + s["BIAS"])
 

@@ -14,7 +14,6 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # tests/
 import torch
-import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
@@ -26,7 +25,7 @@ SHAPE = dict(tmax=8, e=128, k=4, cores=4)
 SIGNATURE = {"SCR_ptr": "*fp32", "IDX_ptr": "*i32", "FLAG_ptr": "*fp32", "num_tokens": "i32"}
 
 
-@triton.jit
+@tla.jit
 def topk_gate(SCR_ptr, IDX_ptr, FLAG_ptr, num_tokens, TMAX: tl.constexpr, E: tl.constexpr, K: tl.constexpr,
               CORES: tl.constexpr):
     tl.static_assert(E > 0 and E <= 384 and K > 0 and K <= 32 and K <= E, "E in [1,384], K in [1, min(E,32)]")
@@ -108,7 +107,7 @@ def _launch():
     SCR = torch.randn(s["tmax"], s["e"], dtype=torch.float32, device="npu")
     IDX = torch.full((s["tmax"], 2 * s["k"]), -1, dtype=torch.int32, device="npu")
     FLAG = torch.zeros(s["tmax"], dtype=torch.float32, device="npu")
-    topk_gate[(s["cores"], )](SCR, IDX, FLAG, s["tmax"], enable_tla_mode=True, **constexprs())
+    topk_gate[(s["cores"], )](SCR, IDX, FLAG, s["tmax"], **constexprs())
     torch.npu.synchronize()
     return SCR, IDX, FLAG
 

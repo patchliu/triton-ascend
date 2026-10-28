@@ -17,7 +17,6 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # tests/
 import torch
-import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
@@ -30,7 +29,7 @@ SHAPE = dict(M=64, N=64, K=64)
 SIGNATURE = {"A_ptr": "*fp16", "B_ptr": "*fp16", "C_ptr": "*fp32"}
 
 
-@triton.jit
+@tla.jit
 def gemm_basic(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr):
     tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0, "M/N/K must be multiples of 16 (cube tile)")
     a_l1 = tla.alloc_buffer((K // 16, M // 16, 16, 16), tl.float16, space="l1")
@@ -54,13 +53,13 @@ def constexprs():
 # ---- standard Triton reference (same semantics/shape) ----
 
 
-@triton.jit
+@tla.jit
 def gemm_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr):
     rows = tl.arange(0, M)
     cols = tl.arange(0, N)
-    a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])   # (M, K)
-    b = tl.load(B_ptr + cols[:, None] * K + rows[None, :])   # (N, K) -> load B(K, N) transposed
-    c = tl.sum(a[:, :, None] * b[None, :, :], axis=1)        # (M, N) f32 accumulate
+    a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])  # (M, K)
+    b = tl.load(B_ptr + cols[:, None] * K + rows[None, :])  # (N, K) -> load B(K, N) transposed
+    c = tl.sum(a[:, :, None] * b[None, :, :], axis=1)  # (M, N) f32 accumulate
     tl.store(C_ptr + rows[:, None] * N + cols[None, :], c)
 
 
@@ -90,7 +89,7 @@ def _launch():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_basic[(1,)](A, B, C, enable_tla_mode=True, **constexprs())
+    gemm_basic[(1, )](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float())
 
@@ -100,7 +99,7 @@ def _launch_triton():
     A = torch.randn(s["M"], s["K"], dtype=torch.float16, device="npu")
     B = torch.randn(s["K"], s["N"], dtype=torch.float16, device="npu")
     C = torch.full((s["M"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    gemm_triton[(1,)](A, B, C, **constexprs())
+    gemm_triton[(1, )](A, B, C, **constexprs())
     torch.npu.synchronize()
     return C, (A.float() @ B.float())
 
