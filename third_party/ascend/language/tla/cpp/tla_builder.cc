@@ -122,8 +122,7 @@ void createBlockSync(TLABuilder &self, const std::string &pipe, int64_t flag,
                      hivm::SyncBlockInstrMode instrMode, bool isSet) {
   auto &builder = self.getBuilder();
   auto *ctx = builder.getContext();
-  auto coreAttr =
-      hivm::TCoreTypeAttr::get(ctx, enclosingCoreType(builder));
+  auto coreAttr = hivm::TCoreTypeAttr::get(ctx, enclosingCoreType(builder));
   auto pipeAttr = getSyncPipe(builder, pipe);
   auto flagAttr = builder.getI64IntegerAttr(checkSyncRange(flag, 15, "flag"));
   auto modeAttr = hivm::SyncBlockInstrModeAttr::get(ctx, instrMode);
@@ -257,11 +256,10 @@ void init_tla_builder(py::module &&m) {
           "create_tla_block_set_flag",
           [](TLABuilder &self, int mode, const std::string &pipe,
              int64_t flag) {
-            createBlockSync(
-                self, pipe, flag,
-                static_cast<hivm::SyncBlockInstrMode>(
-                    checkSyncRange(mode, 2, "sync mode")),
-                /*isSet=*/true);
+            createBlockSync(self, pipe, flag,
+                            static_cast<hivm::SyncBlockInstrMode>(
+                                checkSyncRange(mode, 2, "sync mode")),
+                            /*isSet=*/true);
           },
           py::arg("mode"), py::arg("pipe"), py::arg("flag"))
       .def(

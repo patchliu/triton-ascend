@@ -34,15 +34,12 @@ from utils.tla_test_utils import (get_stages, compile_offline, lower_offline, ch
 # BM query rows, BN key/value rows, D feature dim, N output cols.
 SHAPE = dict(BM=64, BN=64, D=128, N=64, FLAG_S=0, FLAG_P=1, FLAG_O=2)
 
-SIGNATURE = {"Q_ptr": "*fp16", "K_ptr": "*fp16", "V_ptr": "*fp32",
-             "P_ptr": "*fp32", "O_ptr": "*fp32"}
+SIGNATURE = {"Q_ptr": "*fp16", "K_ptr": "*fp16", "V_ptr": "*fp32", "P_ptr": "*fp32", "O_ptr": "*fp32"}
 
 
 @triton.jit
-def flash_attn(Q_ptr, K_ptr, V_ptr, P_ptr, O_ptr,
-               BM: tl.constexpr, BN: tl.constexpr, D: tl.constexpr, N: tl.constexpr,
-               SCALE: tl.constexpr, FLAG_S: tl.constexpr, FLAG_P: tl.constexpr,
-               FLAG_O: tl.constexpr):
+def flash_attn(Q_ptr, K_ptr, V_ptr, P_ptr, O_ptr, BM: tl.constexpr, BN: tl.constexpr, D: tl.constexpr, N: tl.constexpr,
+               SCALE: tl.constexpr, FLAG_S: tl.constexpr, FLAG_P: tl.constexpr, FLAG_O: tl.constexpr):
     tl.static_assert(D % 16 == 0 and BM % 16 == 0 and BN % 16 == 0 and N % 16 == 0,
                      "BM/BN/D/N must be multiples of 16 (cube tile)")
     tl.static_assert(BN == 64, "v1: softmax row must fit one 64-lane f32 register")
@@ -108,17 +105,19 @@ def flash_attn(Q_ptr, K_ptr, V_ptr, P_ptr, O_ptr,
 
 def constexprs():
     s = SHAPE
-    return {"BM": s["BM"], "BN": s["BN"], "D": s["D"], "N": s["N"],
-            "SCALE": 1.0 / s["D"] ** 0.5,
-            "FLAG_S": s["FLAG_S"], "FLAG_P": s["FLAG_P"], "FLAG_O": s["FLAG_O"]}
+    return {
+        "BM": s["BM"], "BN": s["BN"], "D": s["D"], "N": s["N"], "SCALE": 1.0 / s["D"]**0.5, "FLAG_S": s["FLAG_S"],
+        "FLAG_P": s["FLAG_P"], "FLAG_O": s["FLAG_O"]
+    }
 
 
 # ---- torch reference (same semantics/shape) ----
 
+
 def _ref_torch(Q, K, V):
     """Host reference: O = softmax(Q @ K^T / sqrt(D)) @ V."""
     s = SHAPE
-    p = torch.softmax(Q.float() @ K.float().T * (1.0 / s["D"] ** 0.5), dim=-1)  # (BM, BN)
+    p = torch.softmax(Q.float() @ K.float().T * (1.0 / s["D"]**0.5), dim=-1)  # (BM, BN)
     return p @ V  # (BM, N)
 
 
@@ -140,6 +139,7 @@ def test_ir(output_dir=None):
     assert text.count("hivm.hir.sync_block_wait") == 3, "AIV/AIC waits x3"
     assert text.count("ave.hir.vexp") == 1, "one exp inside the softmax row loop"
     assert text.count("ave.hir.vload") == 1, "one row load inside the softmax row loop"
+
     # Each handoff flag must follow its producer and precede its consumer.
     def nth(pat, k):
         """0-based index of the k-th occurrence (k is 1-based)."""
@@ -166,7 +166,7 @@ def _launch():
     V = torch.randn(s["BN"], s["N"], dtype=torch.float32, device="npu")
     P = torch.full((s["BM"], s["BN"]), 0.0, dtype=torch.float32, device="npu")
     O = torch.full((s["BM"], s["N"]), 7.0, dtype=torch.float32, device="npu")
-    flash_attn[(1,)](Q, K, V, P, O, enable_tla_mode=True, **constexprs())
+    flash_attn[(1, )](Q, K, V, P, O, enable_tla_mode=True, **constexprs())
     torch.npu.synchronize()
     return Q, K, V, O
 
@@ -185,8 +185,8 @@ def test_run():
     print("O[:4,:4]  :", oo[:4, :4].tolist())
     print("ref[:4,:4]:", ot[:4, :4].tolist())
     ok = torch.allclose(oo, ot, atol=1e-2, rtol=1e-2)
-    print("FLASH_ATTN", "OK" if ok else "MISMATCH",
-          "BM", SHAPE["BM"], "BN", SHAPE["BN"], "D", SHAPE["D"], "N", SHAPE["N"])
+    print("FLASH_ATTN", "OK" if ok else "MISMATCH", "BM", SHAPE["BM"], "BN", SHAPE["BN"], "D", SHAPE["D"], "N",
+          SHAPE["N"])
     assert ok, "flash_attn e2e mismatch vs torch reference"
 
 

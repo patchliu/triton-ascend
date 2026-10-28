@@ -25,23 +25,19 @@ import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
-from utils.tla_test_utils import (get_stages, compile_offline, lower_offline,
-                                  check_lowered_ir, check_compile_artifacts)
+from utils.tla_test_utils import (get_stages, compile_offline, lower_offline, check_lowered_ir, check_compile_artifacts)
 
 M, N, K = 64, 64, 64
 BIAS = 1.0
 FLAG = 0
 
-SIGNATURE = {"A_ptr": "*fp16", "B_ptr": "*fp16",
-             "C_ptr": "*fp32", "O_ptr": "*fp32"}
+SIGNATURE = {"A_ptr": "*fp16", "B_ptr": "*fp16", "C_ptr": "*fp32", "O_ptr": "*fp32"}
 
 
 @triton.jit
-def sync_inter(A_ptr, B_ptr, C_ptr, O_ptr,
-               M: tl.constexpr, N: tl.constexpr, K: tl.constexpr,
-               BIAS: tl.constexpr, FLAG: tl.constexpr):
-    tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0,
-                     "M/N/K must be multiples of 16 (cube tile)")
+def sync_inter(A_ptr, B_ptr, C_ptr, O_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr, BIAS: tl.constexpr,
+               FLAG: tl.constexpr):
+    tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0, "M/N/K must be multiples of 16 (cube tile)")
     tl.static_assert((M * N) % 64 == 0, "M*N must be a multiple of 64")
 
     a_l1 = tla.alloc_buffer((M, K), tl.float16, space="l1")
@@ -80,26 +76,19 @@ def constexprs():
 
 
 def test_ir(output_dir=None):
-    module, ctx = compile_offline(sync_inter, SIGNATURE, constexprs(),
-                                  output_dir=output_dir)
+    module, ctx = compile_offline(sync_inter, SIGNATURE, constexprs(), output_dir=output_dir)
     text = str(lower_offline(module, ctx, output_dir=output_dir))
-    check_lowered_ir(text, loads=1, stores=1, buffers=4,
-                     extra=("#hivm.tcore_type<CUBE>",
-                            'mix_mode = "mix"'))
+    check_lowered_ir(text, loads=1, stores=1, buffers=4, extra=("#hivm.tcore_type<CUBE>", 'mix_mode = "mix"'))
     assert text.count("hivm.hir.nd2nz") == 2, text
     assert text.count("hivm.hir.mmadL1") == 1, text
     assert text.count("hivm.hir.fixpipe") == 1, text
     assert text.count("ave.hir.vadd") == (M * N) // 64, text
-    set_line = next(l.strip() for l in text.splitlines()
-                    if "hivm.hir.sync_block_set" in l)
-    wait_line = next(l.strip() for l in text.splitlines()
-                     if "hivm.hir.sync_block_wait" in l)
-    assert set_line.startswith(
-        "hivm.hir.sync_block_set[<CUBE>, <PIPE_FIX>, <PIPE_FIX>] "
-        f"flag = {FLAG}"), set_line
-    assert wait_line.startswith(
-        "hivm.hir.sync_block_wait[<VECTOR>, <PIPE_MTE2>, <PIPE_MTE2>] "
-        f"flag = {FLAG}"), wait_line
+    set_line = next(l.strip() for l in text.splitlines() if "hivm.hir.sync_block_set" in l)
+    wait_line = next(l.strip() for l in text.splitlines() if "hivm.hir.sync_block_wait" in l)
+    assert set_line.startswith("hivm.hir.sync_block_set[<CUBE>, <PIPE_FIX>, <PIPE_FIX>] "
+                               f"flag = {FLAG}"), set_line
+    assert wait_line.startswith("hivm.hir.sync_block_wait[<VECTOR>, <PIPE_MTE2>, <PIPE_MTE2>] "
+                                f"flag = {FLAG}"), wait_line
     for line in (set_line, wait_line):
         assert "sync_instr_mode = <INTER_BLOCK_SYNCHRONIZATION>" in line, line
     assert text.index("fixpipe") < text.index("sync_block_set"), \
@@ -115,7 +104,7 @@ def _launch():
     B = torch.randn(K, N, dtype=torch.float16, device="npu")
     C = torch.zeros(M, N, dtype=torch.float32, device="npu")
     O = torch.full((M, N), -7.0, dtype=torch.float32, device="npu")
-    sync_inter[(1,)](A, B, C, O, enable_tla_mode=True, **constexprs())
+    sync_inter[(1, )](A, B, C, O, enable_tla_mode=True, **constexprs())
     torch.npu.synchronize()
     return A, B, C, O
 
@@ -148,9 +137,7 @@ def main():
         test_compile()
     if do_run:
         test_run()
-    print("ALL PASS: sync_inter",
-          "ir" if do_ir else "", "compile" if do_compile else "",
-          "run" if do_run else "")
+    print("ALL PASS: sync_inter", "ir" if do_ir else "", "compile" if do_compile else "", "run" if do_run else "")
 
 
 if __name__ == "__main__":

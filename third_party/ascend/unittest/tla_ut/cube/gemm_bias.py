@@ -33,10 +33,9 @@ SIGNATURE = {"A_ptr": "*fp16", "B_ptr": "*fp16", "C_ptr": "*fp32"}
 
 
 @triton.jit
-def gemm_bias(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr,
-              BIAS: tl.constexpr, FLAG: tl.constexpr):
-    tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0,
-                     "M/N/K must be multiples of 16 (cube tile)")
+def gemm_bias(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr, BIAS: tl.constexpr,
+              FLAG: tl.constexpr):
+    tl.static_assert(K % 16 == 0 and M % 16 == 0 and N % 16 == 0, "M/N/K must be multiples of 16 (cube tile)")
     tl.static_assert((M * N) % 64 == 0, "M*N must be a multiple of 64 (vector lanes)")
     a_l1 = tla.alloc_buffer((K // 16, M // 16, 16, 16), tl.float16, space="l1")
     b_l1 = tla.alloc_buffer((N // 16, K // 16, 16, 16), tl.float16, space="l1")
@@ -60,9 +59,9 @@ def gemm_bias(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.const
             for i in tl.range((M * N) // 64):
                 row = i // (N // 64)
                 col = (i % (N // 64)) * 64
-                v = tla.simd.vlds(c_ub[row, col])          # NORM, ND row-major read
+                v = tla.simd.vlds(c_ub[row, col])  # NORM, ND row-major read
                 tla.simd.vsts(c_ub[row, col], tla.simd.vadd(v, bias))
-        tla.copy(c_ub, c_blk)                   # hivm.hir.store (MTE3 UB->GM)
+        tla.copy(c_ub, c_blk)  # hivm.hir.store (MTE3 UB->GM)
 
 
 def constexprs():

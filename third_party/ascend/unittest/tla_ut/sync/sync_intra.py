@@ -23,8 +23,7 @@ import triton
 import triton.language as tl
 import triton.language.extra.tla as tla
 
-from utils.tla_test_utils import (get_stages, compile_offline, lower_offline,
-                                  check_lowered_ir, check_compile_artifacts)
+from utils.tla_test_utils import (get_stages, compile_offline, lower_offline, check_lowered_ir, check_compile_artifacts)
 
 N = 64  # f32 vector-register lane count (2048 bits)
 
@@ -33,12 +32,12 @@ SIGNATURE = {"A_ptr": "*fp32", "B_ptr": "*fp32", "O_ptr": "*fp32"}
 
 @triton.jit
 def sync_intra(A_ptr, B_ptr, O_ptr, N: tl.constexpr):
-    a_ub = tla.alloc_buffer((N,), tl.float32, space="ub")
-    b_ub = tla.alloc_buffer((N,), tl.float32, space="ub")
-    o_ub = tla.alloc_buffer((N,), tl.float32, space="ub")
-    a = tla.view(A_ptr, (N,), strides=(1,), offsets=(0,))
-    b = tla.view(B_ptr, (N,), strides=(1,), offsets=(0,))
-    o = tla.view(O_ptr, (N,), strides=(1,), offsets=(0,))
+    a_ub = tla.alloc_buffer((N, ), tl.float32, space="ub")
+    b_ub = tla.alloc_buffer((N, ), tl.float32, space="ub")
+    o_ub = tla.alloc_buffer((N, ), tl.float32, space="ub")
+    a = tla.view(A_ptr, (N, ), strides=(1, ), offsets=(0, ))
+    b = tla.view(B_ptr, (N, ), strides=(1, ), offsets=(0, ))
+    o = tla.view(O_ptr, (N, ), strides=(1, ), offsets=(0, ))
 
     tla.copy(a, a_ub)
     tla.copy(b, b_ub)
@@ -66,12 +65,10 @@ def constexprs():
 
 
 def test_ir(output_dir=None):
-    module, ctx = compile_offline(sync_intra, SIGNATURE, constexprs(),
-                                  output_dir=output_dir)
+    module, ctx = compile_offline(sync_intra, SIGNATURE, constexprs(), output_dir=output_dir)
     text = str(lower_offline(module, ctx, output_dir=output_dir))
     check_lowered_ir(text, loads=2, stores=1, buffers=3)
-    for op in ("hivm.hir.set_flag", "hivm.hir.wait_flag",
-               "hivm.hir.pipe_barrier", "hivm.hir.sync_block"):
+    for op in ("hivm.hir.set_flag", "hivm.hir.wait_flag", "hivm.hir.pipe_barrier", "hivm.hir.sync_block"):
         assert text.count(op) == (2 if "flag" in op else 1), text
     assert text.count("hivm.hir.set_flag[<PIPE_MTE2>, <PIPE_V>") == 1, text
     assert text.count("hivm.hir.wait_flag[<PIPE_MTE2>, <PIPE_V>") == 1, text
@@ -80,9 +77,10 @@ def test_ir(output_dir=None):
     assert "hivm.hir.pipe_barrier[<PIPE_ALL>]" in text, text
     assert "hivm.hir.sync_block[<ALL_VECTOR>]" in text, text
     assert text.count("ave.hir.vadd") == 1, text
-    order = [text.index(op) for op in (
-        "hivm.hir.set_flag", "hivm.hir.wait_flag", "ave.hir.vadd",
-        "hivm.hir.pipe_barrier", "hivm.hir.store")]
+    order = [
+        text.index(op)
+        for op in ("hivm.hir.set_flag", "hivm.hir.wait_flag", "ave.hir.vadd", "hivm.hir.pipe_barrier", "hivm.hir.store")
+    ]
     assert order == sorted(order), "sync ops must stay between the stages"
     print("IR PASS: sync_intra (MTE2->V->MTE3 hand sync, barrier, sync_all)")
 
@@ -91,8 +89,8 @@ def _launch():
     import torch
     A = torch.randn(N, dtype=torch.float32, device="npu")
     B = torch.randn(N, dtype=torch.float32, device="npu")
-    O = torch.full((N,), -7.0, dtype=torch.float32, device="npu")
-    sync_intra[(1,)](A, B, O, enable_tla_mode=True, **constexprs())
+    O = torch.full((N, ), -7.0, dtype=torch.float32, device="npu")
+    sync_intra[(1, )](A, B, O, enable_tla_mode=True, **constexprs())
     torch.npu.synchronize()
     return A, B, O
 
@@ -121,9 +119,7 @@ def main():
         test_compile()
     if do_run:
         test_run()
-    print("ALL PASS: sync_intra",
-          "ir" if do_ir else "", "compile" if do_compile else "",
-          "run" if do_run else "")
+    print("ALL PASS: sync_intra", "ir" if do_ir else "", "compile" if do_compile else "", "run" if do_run else "")
 
 
 if __name__ == "__main__":
