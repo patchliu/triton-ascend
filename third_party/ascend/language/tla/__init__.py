@@ -31,9 +31,31 @@ Exports: ``alloc_buffer``/``alloc`` (on-chip buffer + versions),
 """
 
 from .core import buffer, buffer_type, vector, vector_type
-from .scope import scope
+from .scope import scope, sub_block_id, sync_block_set, sync_block_wait
 from .alloc import alloc_buffer, alloc
 from .copy import copy
+from .dma import (
+    copy_ub_to_l1,
+    copy_l1_to_ub,
+    copy_l1_to_bt,
+    copy_l1_to_fb,
+    fixpipe_l0c_to_dst,
+    nd2nz_gm_to_l1,
+    load_gm_to_l1,
+    load_gm_to_ub,
+    store_ub_to_gm,
+    copy_l1_to_l0,
+    set_ctrl,
+    PadMode,
+    EvictionPolicy,
+    AtomicKind,
+    UnitFlagMode,
+    FixpipeDMAMode,
+    FixpipeDualDstMode,
+    FixpipeSubBlock,
+    FixpipePreQuantMode,
+    FixpipePreReluMode,
+)
 from .view import view, reshape
 from .aux_ops import annotate_buffer_versions
 from . import math
@@ -57,11 +79,34 @@ __all__ = [
     "alloc_buffer",
     "alloc",
     "copy",
+    "copy_ub_to_l1",
+    "copy_l1_to_ub",
+    "copy_l1_to_bt",
+    "copy_l1_to_fb",
+    "fixpipe_l0c_to_dst",
+    "nd2nz_gm_to_l1",
+    "load_gm_to_l1",
+    "load_gm_to_ub",
+    "store_ub_to_gm",
+    "copy_l1_to_l0",
+    "set_ctrl",
+    "PadMode",
+    "EvictionPolicy",
+    "AtomicKind",
+    "UnitFlagMode",
+    "FixpipeDMAMode",
+    "FixpipeDualDstMode",
+    "FixpipeSubBlock",
+    "FixpipePreQuantMode",
+    "FixpipePreReluMode",
     "view",
     "reshape",
 
     # core-mode scopes (scope.simd / scope.cube)
     "scope",
+    "sub_block_id",
+    "sync_block_set",
+    "sync_block_wait",
 
     # math helpers / diagnostics
     "math",
