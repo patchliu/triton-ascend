@@ -146,7 +146,7 @@ def infer_func_core_type(module):
 
 
 def _infer_kernel_mode(module, context):
-    """Stamp the entry core type and its corresponding backend launch mode."""
+    """Stamp the entry core type, launch mode and VF mode on the kernel entry."""
     from triton._C.libtriton.ascend import ir as ascend_ir
 
     entries = _kernel_entries(module)
@@ -160,6 +160,19 @@ def _infer_kernel_mode(module, context):
     builder.set_op_attr(entry, "hivm.func_core_type", builder.parse_attr(f"#hivm.func_core_type<{core_type}>"))
     builder.set_op_attr(entry, "mix_mode", builder.get_string_attr("aiv" if core_type == "AIV" else "mix"))
     module.set_attr("hivm.module_core_type", builder.parse_attr(f"#hivm.module_core_type<{core_type}>"))
+    # The entry is MIX only when a SIMT scope is present; SIMD-only kernels
+    # leave the attribute unset, and each VF scope carries its own mode. The
+    # generic binding cannot read the dialect-typed vf_mode attr, so also
+    # match it on the printed scope.
+    scopes = []
+    module.walk(scopes.append)
+    has_simt = any(
+        op.get_name() == "scope.scope"
+        and (op.get_str_attr("vector_mode") == "simt" or "#hivm.vf_mode<SIMT>" in str(op))
+        for op in scopes
+    )
+    if has_simt:
+        builder.set_op_attr(entry, "hivm.vf_mode", builder.parse_attr("#hivm.vf_mode<MIX>"))
 
 
 def check_ttadapter(module):

@@ -58,9 +58,10 @@ def constexprs():
 def gemm_triton(A_ptr, B_ptr, C_ptr, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr):
     rows = tl.arange(0, M)
     cols = tl.arange(0, N)
-    a = tl.load(A_ptr + rows[:, None] * K + cols[None, :])  # (M, K)
-    b = tl.load(B_ptr + cols[:, None] * K + rows[None, :])  # (N, K) -> load B(K, N) transposed
-    c = tl.sum(a[:, :, None] * b[None, :, :], axis=1)  # (M, N) f32 accumulate
+    inner = tl.arange(0, K)
+    a = tl.load(A_ptr + rows[:, None] * K + inner[None, :])  # (M, K)
+    b = tl.load(B_ptr + inner[:, None] * N + cols[None, :])  # (K, N)
+    c = tl.dot(a, b)  # (M, N) f32 accumulate
     tl.store(C_ptr + rows[:, None] * N + cols[None, :], c)
 
 

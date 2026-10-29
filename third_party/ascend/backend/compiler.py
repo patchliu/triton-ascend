@@ -440,6 +440,12 @@ def ttir_to_linalg(mod, metadata, opt, *, named_ops=True):
             print(f"[DEBUG] cmd list: {shlex.join(cmd)}")
 
         pm.run(mod, 'ttir_to_linalg')
+        # _infer_kernel_mode runs only on the TLA offline path (lower_ttir);
+        # mirror it here so runtime JIT IR carries the same core/VF markers
+        # into bishengir-compile. Only TLA modules emit scope tcore_type attrs.
+        if "#hivm.tcore_type" in str(mod):
+            from triton.language.extra.tla.compiler import _infer_kernel_mode
+            _infer_kernel_mode(mod, mod.context)
         _adjust_metadata_by_module_result(mod, metadata, opt, enable_mixed_cv=enable_mixed_cv,
                                           disable_auto_inject_block_sync=disable_auto_inject_block_sync,
                                           set_workspace_multibuffer=set_workspace_multibuffer)
