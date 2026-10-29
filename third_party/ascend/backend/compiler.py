@@ -442,8 +442,8 @@ def ttir_to_linalg(mod, metadata, opt, *, named_ops=True):
         pm.run(mod, 'ttir_to_linalg')
         # _infer_kernel_mode runs only on the TLA offline path (lower_ttir);
         # mirror it here so runtime JIT IR carries the same core/VF markers
-        # into bishengir-compile. Only TLA modules emit scope tcore_type attrs.
-        if "#hivm.tcore_type" in str(mod):
+        # into bishengir-compile.
+        if opt.enable_tla_mode:
             from triton.language.extra.tla.compiler import _infer_kernel_mode
             _infer_kernel_mode(mod, mod.context)
         _adjust_metadata_by_module_result(mod, metadata, opt, enable_mixed_cv=enable_mixed_cv,
@@ -832,6 +832,8 @@ def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
                 "--enable-hfusion-compile=true",
                 "--enable-triton-kernel-compile=true",
             ]
+            if opt.enable_tla_mode:
+                _compile_option_list += ["--enable-tla-mode=true"]
             _compile_option_list += _full_row_copy_compile_options(metadata, npu_compiler_path)
             # Temporary until the NPU compiler enables batch matmul by default in Q4.
             if metadata.get("enable_hivm_batch_matmul"):
@@ -1253,6 +1255,9 @@ class NPUOptions:
     disable_auto_inject_block_sync: bool = None
     enable_mixed_cv: bool = None
     enable_dynamic_cv_pipeline: bool = None
+    # TLA flag set by TLASTSource.make_ir; init=False keeps it out of launch
+    # arguments and the cache key.
+    enable_tla_mode: bool = field(default=False, init=False)
     enable_cube_block_merge: bool = False
     hfusion_enable_multiple_consumer_fusion: bool = None
     buf_slot_num_of_veccore: int = None

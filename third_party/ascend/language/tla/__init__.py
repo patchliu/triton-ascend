@@ -30,8 +30,6 @@ Exports: ``alloc_buffer``/``alloc`` (on-chip buffer + versions),
 ``simd`` (vector-register ops), ``annotate_buffer_versions``.
 """
 
-import triton
-
 from .core import buffer, buffer_type, vector, vector_type
 from .scope import scope
 from .alloc import alloc_buffer, alloc
@@ -54,8 +52,14 @@ from . import sync
 
 
 def jit(fn=None, **kwargs):
-    """``triton.jit`` alias; ``hacc.mode`` is stamped at ``lower_ttir``."""
-    return triton.jit(fn, **kwargs) if fn is not None else triton.jit(**kwargs)
+    """``@tla.jit``: like ``triton.jit``, but kernels lower via the same TLA
+    frontend entry as the offline tla_ut flow."""
+    from .jit import TLAJITFunction
+
+    def decorator(f):
+        return TLAJITFunction(f, **kwargs)
+
+    return decorator(fn) if fn is not None else decorator
 
 
 __all__ = [
