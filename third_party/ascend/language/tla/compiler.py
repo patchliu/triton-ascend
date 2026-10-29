@@ -108,7 +108,7 @@ def lower_ttir(module, context, compile_on_910_95=True, compile_mode="simd_simt_
     pm.run(module, "module")
     if not module.verify():
         raise RuntimeError("triton_to_linalg produced invalid IR")
-    _infer_kernel_mode(module, context)
+    _infer_tla_kernel_mode(module, context)
     if output_dir is not None:
         (output_dir / "01_linalg.mlir").write_text(str(module))
     check_ttadapter(module)
@@ -145,8 +145,8 @@ def infer_func_core_type(module):
     return None
 
 
-def _infer_kernel_mode(module, context):
-    """Stamp the entry core type and its corresponding backend launch mode."""
+def _infer_tla_kernel_mode(module, context):
+    """Stamp the entry core type, launch mode and VF mode on the kernel entry."""
     from triton._C.libtriton.ascend import ir as ascend_ir
 
     entries = _kernel_entries(module)
@@ -160,6 +160,14 @@ def _infer_kernel_mode(module, context):
     builder.set_op_attr(entry, "hivm.func_core_type", builder.parse_attr(f"#hivm.func_core_type<{core_type}>"))
     builder.set_op_attr(entry, "mix_mode", builder.get_string_attr("aiv" if core_type == "AIV" else "mix"))
     module.set_attr("hivm.module_core_type", builder.parse_attr(f"#hivm.module_core_type<{core_type}>"))
+    # MIX only when a SIMT scope exists; the binding can't read dialect-typed
+    # vf_mode, so match it on the printed scope too.
+    scopes = []
+    module.walk(scopes.append)
+    has_simt = any(op.get_name() == "scope.scope" and (
+        op.get_str_attr("vector_mode") == "simt" or "#hivm.vf_mode<SIMT>" in str(op)) for op in scopes)
+    if has_simt:
+        builder.set_op_attr(entry, "hivm.vf_mode", builder.parse_attr("#hivm.vf_mode<MIX>"))
 
 
 def check_ttadapter(module):
@@ -218,7 +226,7 @@ def ast_to_ttir(fn, signature, constexprs, context, options, module=None):
                               jit_fn=fn, is_kernel=True, file_name=file_name, begin_line=begin_line, options=options,
                               codegen_fns={}, module_map={}, module=module, is_gluon=False)
     arch = getattr(options, "arch", None)
-    # Runtime mounts the TLA builder via its patch; mount it here explicitly.
+    # Mount the TLA builder on the code generator before visiting the AST.
     from triton.language.extra.tla.builder import setup_unified_builder
 
     tla_builder = ascend_ir.tla_builder(context, arch or "")
