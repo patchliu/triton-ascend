@@ -334,6 +334,9 @@ def make_ttir(mod, metadata, opt):
 
 
 def ttir_to_linalg(mod, metadata, opt, *, named_ops=True):
+    if mod.get_operation().get_str_attr("hacc.mode") == "tla":
+        from triton.language.extra.tla.compiler import lower_runtime
+        return lower_runtime(mod, metadata, opt, named_ops=named_ops)
     # use triton_adapter to lower Triton-MLIR to linalg
     # Get Triton-MLIR as string
     ttir_code = _serialize_module(mod, opt)
