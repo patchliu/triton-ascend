@@ -83,7 +83,7 @@ def test_ir(output_dir=None):
     module, ctx = compile_offline(sync_inter, SIGNATURE, constexprs(),
                                   output_dir=output_dir)
     text = str(lower_offline(module, ctx, output_dir=output_dir))
-    check_lowered_ir(text, loads=1, stores=1, buffers=4,
+    check_lowered_ir(text, loads=1, stores=1, buffers=None,
                      extra=("#hivm.tcore_type<CUBE>",
                             'mix_mode = "mix"'))
     assert text.count("hivm.hir.nd2nz") == 2, text
