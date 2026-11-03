@@ -49,6 +49,9 @@ def output_dir():
 def pytest_collect_file(file_path, parent):
     """Extend normal collection to op-named files without collecting modules twice."""
     collectors = yield
+    # DSA is a standalone runtime benchmark, not an IR/compile pytest case.
+    if file_path.parent.name == "dsa":
+        return []
     if file_path.suffix == ".py" and file_path.name != "conftest.py":
         if not any(isinstance(collector, pytest.Module) for collector in collectors):
             collectors.append(pytest.Module.from_parent(parent, path=file_path))
