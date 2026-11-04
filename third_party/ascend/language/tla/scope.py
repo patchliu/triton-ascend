@@ -17,21 +17,52 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Core-mode scopes for TLA (``with tla.scope.simd():``).
+"""Core-mode scopes and compile-time task/stage annotations for TLA.
 
-A scope marks a block of ops (``simd.*`` on the vector core) that the compiler
-emits as an inline ``scope.scope`` carrying the core-mode markers; the
-bishengir ``outline-scope`` pass extracts marked SIMD scopes into the
-``func.func`` + ``func.call`` that the HIVM stage consumes.
-
-``tla.scope.vector()``, ``tla.scope.simd()`` and ``tla.scope.cube()`` are the
-entry points; each is a context-manager class (the core mode is fixed on the
-class), so the compiler dispatch table keys off the class object itself. Each
-class defines ``mlir_attrs``, the attribute set stamped on the emitted
-``scope.scope``.
+Task annotations describe a logical schedule, not an executable pipeline.
+The NPU-IR scheduling backend must resolve them before device compilation.
 """
+from dataclasses import dataclass
+from triton.language.core import _unwrap_if_constexpr
 
-__all__ = ["scope", "vector", "simd", "cube"]
+__all__ = ["scope", "vector", "simd", "cube", "schedule"]
+
+
+@dataclass(frozen=True)
+class _TaskScope:
+    kind: type
+    name: str
+    stage: object = None
+
+    def __post_init__(self):
+        if not isinstance(self.name, str) or not self.name:
+            raise ValueError("task name must be a nonempty compile-time string")
+        if self.stage is not None and (type(self.stage) is not int or not 0 <= self.stage < 2**31):
+            raise ValueError("task stage must be a nonnegative compile-time i32 integer or None")
+
+    def mlir_attrs(self, builder):
+        attrs = self.kind.mlir_attrs(builder)
+        attrs["hivm.task_name"] = builder.get_string_attr(self.name)
+        if self.stage is not None:
+            attrs["hivm.required_stage"] = builder.parse_attr(f"{self.stage} : i32")
+        return attrs
+
+
+@dataclass(frozen=True)
+class schedule:
+    """Logical automatic schedule region; currently supported through ttadapter only."""
+    mode: str = "auto"
+
+    def __post_init__(self):
+        object.__setattr__(self, "mode", _unwrap_if_constexpr(self.mode))
+        if type(self.mode) is not str or self.mode != "auto":
+            raise ValueError("only schedule('auto') is currently supported")
+
+    def mlir_attrs(self, builder):
+        return {
+            "hivm.schedule_domain": builder.get_string_attr(self.mode), "hivm.schedule_state":
+            builder.get_string_attr("logical")
+        }
 
 
 class scope:
@@ -42,10 +73,19 @@ class scope:
     ``scope.scope`` (``mlir_attrs``). The Triton code generator routes ``with``
     statements whose context expression evaluates to one of these classes to
     ``code_generator.handle_scope_with`` via ``TLA_WITH_DISPATCH``, so the
-    classes are never instantiated.
+    plain and task-annotated scopes share the same core-mode attributes.
     """
 
     core_mode = "vector"
+
+    @classmethod
+    def task(cls, name, *, stage=None):
+        """Name a task group and optionally constrain its pipeline stage.
+
+        Unspecified stages remain free. A group may contain several pipes;
+        NPU-IR must split it into resource tasks while preserving dependencies.
+        """
+        return _TaskScope(cls, _unwrap_if_constexpr(name), _unwrap_if_constexpr(stage))
 
     @classmethod
     def mlir_attrs(cls, builder):
@@ -92,7 +132,7 @@ class simd(scope):
 
 
 class cube(scope):
-    """``with tla.scope.cube():`` -- cube-core region (reserved; cube ops not yet exposed).
+    """``with tla.scope.cube():`` -- cube-core region.
 
     AIC scopes are not vector functions: only ``hivm.tcore_type<CUBE>`` is
     stamped, so outline-scope never extracts them into an AIV vector function.
@@ -109,3 +149,5 @@ class cube(scope):
 scope.vector = vector
 scope.simd = simd
 scope.cube = cube
+
+scope.schedule = schedule

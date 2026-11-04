@@ -1,0 +1,161 @@
+// Expected ttadapter IR before schedule solving; TILES=3.
+module attributes {hacc.mode = "tla", hacc.target = #hacc.target<"Ascend910_9589">, hivm.module_core_type = #hivm.module_core_type<MIX>} {
+  func.func @attention_stages(%arg0: memref<?xi8>, %arg1: memref<?xi8>, %Q: memref<?xbf16>, %K: memref<?xbf16>, %V: memref<?xbf16>, %O: memref<?xf32>, %arg6: i32, %arg7: i32, %arg8: i32, %arg9: i32, %arg10: i32, %arg11: i32) attributes {SyncBlockLockArgIdx = 0 : i64, WorkspaceArgIdx = 1 : i64, global_kernel = "local", hivm.func_core_type = #hivm.func_core_type<MIX>, mix_mode = "mix", parallel_mode = "simd"} {
+    %c4 = arith.constant 4 : index
+    %c2 = arith.constant 2 : index
+    %c512_i64 = arith.constant 512 : i64
+    %c128_i64 = arith.constant 128 : i64
+    %c8_i32 = arith.constant 8 : i32
+    %c0 = arith.constant 0 : index
+    %c1024_i32 = arith.constant 1024 : i32
+    %c1_i32 = arith.constant 1 : i32
+    %c3_i32 = arith.constant 3 : i32
+    %c0_i32 = arith.constant 0 : i32
+    %c144 = arith.constant 144 : index
+    %x1 = arith.constant 1.250000e-01 : f32
+    %c128 = arith.constant 128 : index
+    %c64 = arith.constant 64 : index
+    %c16 = arith.constant 16 : index
+    %true = arith.constant true
+    %c16_i32 = arith.constant 16 : i32
+    scope.scope : () -> () {
+      scf.for %t = %c0_i32 to %c3_i32 step %c1_i32  : i32 {
+        %q = memref.alloc() : memref<4x1x16x16xbf16, #hivm.address_space<cbuf>>
+        %k = memref.alloc() : memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>
+        %v = memref.alloc() : memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>
+        %p = memref.alloc() : memref<8x1x16x16xbf16, #hivm.address_space<cbuf>>
+        %qk = memref.alloc() : memref<8x1x16x16xf32, #hivm.address_space<cc>>
+        %pv = memref.alloc() : memref<4x1x16x16xf32, #hivm.address_space<cc>>
+        %score = memref.alloc() : memref<8x128xf32, #hivm.address_space<ub>>
+        %prob = memref.alloc() : memref<8x144xbf16, #hivm.address_space<ub>>
+        %out = memref.alloc() : memref<8x64xf32, #hivm.address_space<ub>>
+        %sub = hivm.hir.get_sub_block_idx -> i64
+        scope.scope : () -> () {
+          %0 = arith.muli %t, %c1024_i32 : i32
+          %1 = arith.index_cast %0 : i32 to index
+          %reinterpret_cast = memref.reinterpret_cast %Q to offset: [%1], sizes: [1], strides: [1] : memref<?xbf16> to memref<1xbf16, strided<[1], offset: ?>>
+          %intptr = memref.extract_aligned_pointer_as_index %reinterpret_cast : memref<1xbf16, strided<[1], offset: ?>> -> index
+          %base_buffer, %offset, %sizes, %strides = memref.extract_strided_metadata %reinterpret_cast : memref<1xbf16, strided<[1], offset: ?>> -> memref<bf16>, index, index, index
+          %2 = arith.muli %offset, %c2 : index
+          %3 = arith.addi %intptr, %2 : index
+          %4 = arith.index_cast %3 : index to i64
+          %c64_0 = arith.constant 64 : index
+          %5 = arith.index_cast %c0 : index to i64
+          %c2_i64 = arith.constant 2 : i64
+          %6 = arith.muli %5, %c2_i64 : i64
+          %7 = arith.addi %4, %6 : i64
+          %8 = hivm.hir.pointer_cast(%7) [%c64_0] : memref<?xbf16, #hivm.address_space<gm>>
+          annotation.mark %8 {address_space = #hivm.address_space<gm>} : memref<?xbf16, #hivm.address_space<gm>>
+          %reinterpret_cast_1 = memref.reinterpret_cast %8 to offset: [0], sizes: [16, 64], strides: [64, 1] : memref<?xbf16, #hivm.address_space<gm>> to memref<16x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>
+          hivm.hir.nd2nz {dst_continuous} ins(%reinterpret_cast_1 : memref<16x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>) outs(%q : memref<4x1x16x16xbf16, #hivm.address_space<cbuf>>)
+          %intptr_2 = memref.extract_aligned_pointer_as_index %K : memref<?xbf16> -> index
+          %9 = arith.index_cast %intptr_2 : index to i64
+          %c64_3 = arith.constant 64 : index
+          %10 = arith.index_cast %c0 : index to i64
+          %c2_i64_4 = arith.constant 2 : i64
+          %11 = arith.muli %10, %c2_i64_4 : i64
+          %12 = arith.addi %9, %11 : i64
+          %13 = hivm.hir.pointer_cast(%12) [%c64_3] : memref<?xbf16, #hivm.address_space<gm>>
+          annotation.mark %13 {address_space = #hivm.address_space<gm>} : memref<?xbf16, #hivm.address_space<gm>>
+          %reinterpret_cast_5 = memref.reinterpret_cast %13 to offset: [0], sizes: [128, 64], strides: [64, 1] : memref<?xbf16, #hivm.address_space<gm>> to memref<128x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>
+          hivm.hir.nd2nz {dst_continuous} ins(%reinterpret_cast_5 : memref<128x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>) outs(%k : memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>)
+          scope.return
+        } {hivm.required_stage = 0 : i32, hivm.task_name = "load_qk", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          %intptr = memref.extract_aligned_pointer_as_index %V : memref<?xbf16> -> index
+          %0 = arith.index_cast %intptr : index to i64
+          %c64_0 = arith.constant 64 : index
+          %1 = arith.index_cast %c0 : index to i64
+          %c2_i64 = arith.constant 2 : i64
+          %2 = arith.muli %1, %c2_i64 : i64
+          %3 = arith.addi %0, %2 : i64
+          %4 = hivm.hir.pointer_cast(%3) [%c64_0] : memref<?xbf16, #hivm.address_space<gm>>
+          annotation.mark %4 {address_space = #hivm.address_space<gm>} : memref<?xbf16, #hivm.address_space<gm>>
+          %reinterpret_cast = memref.reinterpret_cast %4 to offset: [0], sizes: [128, 64], strides: [64, 1] : memref<?xbf16, #hivm.address_space<gm>> to memref<128x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>
+          hivm.hir.nd2nz {dst_continuous} ins(%reinterpret_cast : memref<128x64xbf16, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>) outs(%v : memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>)
+          scope.return
+        } {hivm.task_name = "load_v", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          hivm.hir.mmadL1 {b_transpose} ins(%q, %k, %true, %c16, %c64, %c128 : memref<4x1x16x16xbf16, #hivm.address_space<cbuf>>, memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>, i1, index, index, index) outs(%qk : memref<8x1x16x16xf32, #hivm.address_space<cc>>)
+          scope.return
+        } {hivm.required_stage = 1 : i32, hivm.task_name = "qk", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          hivm.hir.fixpipe {c0_pad_en = true, dma_mode = #hivm.dma_mode<nz2nd>} ins(%qk : memref<8x1x16x16xf32, #hivm.address_space<cc>>) outs(%score : memref<8x128xf32, #hivm.address_space<ub>>) dual_dst_mode = <ROW_SPLIT>
+          scope.return
+        } {hivm.required_stage = 1 : i32, hivm.task_name = "score", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          scf.for %row = %c0_i32 to %c8_i32 step %c1_i32  : i32 {
+            %x0 = arith.index_cast %row : i32 to index
+            %x0_0 = ave.hir.vload <NORM> %score[%x0, %c0] : memref<8x128xf32, #hivm.address_space<ub>> into vector<64xf32>
+            %x0_1 = ave.hir.pge <ALL> : vector<64xi1>
+            %x0_2 = ave.hir.vmuls %x0_0, %x1, %x0_1 : vector<64xf32>, f32, vector<64xi1>
+            %x1_3 = ave.hir.vload <NORM> %score[%x0, %c64] : memref<8x128xf32, #hivm.address_space<ub>> into vector<64xf32>
+            %x1_4 = ave.hir.vmuls %x1_3, %x1, %x0_1 : vector<64xf32>, f32, vector<64xi1>
+            %maximum = ave.hir.vmax %x0_2, %x1_4, %x0_1 : vector<64xf32>, vector<64xi1>
+            %maximum_5 = ave.hir.reduction <max>, %maximum, %x0_1 : vector<64xf32>, vector<64xi1> -> vector<64xf32>
+            %maximum_6 = ave.hir.vector_broadcast %maximum_5, %x0_1, true : vector<64xf32>, vector<64xi1> -> vector<64xf32>
+            %e0 = ave.hir.vsub %x0_2, %maximum_6, %x0_1 : vector<64xf32>, vector<64xi1>
+            %e0_7 = ave.hir.vexp %e0, %x0_1 : vector<64xf32>, vector<64xi1>
+            %e1 = ave.hir.vsub %x1_4, %maximum_6, %x0_1 : vector<64xf32>, vector<64xi1>
+            %e1_8 = ave.hir.vexp %e1, %x0_1 : vector<64xf32>, vector<64xi1>
+            %total = ave.hir.vadd %e0_7, %e1_8, %x0_1 : vector<64xf32>, vector<64xi1>
+            %total_9 = ave.hir.reduction <add>, %total, %x0_1 : vector<64xf32>, vector<64xi1> -> vector<64xf32>
+            %total_10 = ave.hir.vector_broadcast %total_9, %x0_1, true : vector<64xf32>, vector<64xi1> -> vector<64xf32>
+            %p0 = ave.hir.vdiv %e0_7, %total_10, %x0_1 : vector<64xf32>, vector<64xi1>
+            %p0_11 = ave.hir.vtruncf %p0, <round>, true, <part_even>, %x0_1 : vector<64xf32>, vector<128xbf16>, vector<64xi1>
+            %p1 = ave.hir.vdiv %e1_8, %total_10, %x0_1 : vector<64xf32>, vector<64xi1>
+            %p1_12 = ave.hir.vtruncf %p1, <round>, true, <part_even>, %x0_1 : vector<64xf32>, vector<128xbf16>, vector<64xi1>
+            %res1, %res2 = ave.hir.vdintlv %p0_11, %p1_12 {layout_change = #ave<layout_change SPARSE>} : vector<128xbf16>, vector<128xbf16>
+            %0 = arith.muli %row, %c16_i32 : i32
+            %1 = ave.hir.pge <ALL> : vector<128xi1>
+            %2 = arith.index_cast %0 : i32 to index
+            ave.hir.store_with_stride %prob[%c0, %2], %c144, %1, %res1 : memref<8x144xbf16, #hivm.address_space<ub>>, vector<128xi1>, vector<128xbf16>
+          }
+          scope.return
+        } {hivm.func_core_type = #hivm.func_core_type<AIV>, hivm.required_stage = 2 : i32, hivm.task_name = "softmax", hivm.tcore_type = #hivm.tcore_type<VECTOR>, hivm.vector_function, hivm.vf_mode = #hivm.vf_mode<SIMD>, no_inline, outline, vector_mode = "vec"}
+        scope.scope : () -> () {
+          %subview = memref.subview %prob[0, 0] [8, 128] [1, 1] : memref<8x144xbf16, #hivm.address_space<ub>> to memref<8x128xbf16, strided<[144, 1]>, #hivm.address_space<ub>>
+          %0 = arith.muli %sub, %c128_i64 : i64
+          %collapse_shape = memref.collapse_shape %p [[0], [1, 2, 3]] : memref<8x1x16x16xbf16, #hivm.address_space<cbuf>> into memref<8x256xbf16, #hivm.address_space<cbuf>>
+          %1 = arith.index_cast %0 : i64 to index
+          %subview_0 = memref.subview %collapse_shape[0, %1] [8, 128] [1, 1] : memref<8x256xbf16, #hivm.address_space<cbuf>> to memref<8x128xbf16, strided<[256, 1], offset: ?>, #hivm.address_space<cbuf>>
+          hivm.hir.copy ins(%subview : memref<8x128xbf16, strided<[144, 1]>, #hivm.address_space<ub>>) outs(%subview_0 : memref<8x128xbf16, strided<[256, 1], offset: ?>, #hivm.address_space<cbuf>>)
+          scope.return
+        } {hivm.required_stage = 2 : i32, hivm.task_name = "prob", hivm.tcore_type = #hivm.tcore_type<VECTOR>}
+        scope.scope : () -> () {
+          hivm.hir.mmadL1 ins(%p, %v, %true, %c16, %c128, %c64 : memref<8x1x16x16xbf16, #hivm.address_space<cbuf>>, memref<4x8x16x16xbf16, #hivm.address_space<cbuf>>, i1, index, index, index) outs(%pv : memref<4x1x16x16xf32, #hivm.address_space<cc>>)
+          scope.return
+        } {hivm.required_stage = 3 : i32, hivm.task_name = "pv", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          hivm.hir.fixpipe {c0_pad_en = true, dma_mode = #hivm.dma_mode<nz2nd>} ins(%pv : memref<4x1x16x16xf32, #hivm.address_space<cc>>) outs(%out : memref<8x64xf32, #hivm.address_space<ub>>) dual_dst_mode = <ROW_SPLIT>
+          scope.return
+        } {hivm.required_stage = 3 : i32, hivm.task_name = "output", hivm.tcore_type = #hivm.tcore_type<CUBE>}
+        scope.scope : () -> () {
+          %0 = arith.muli %t, %c1024_i32 : i32
+          %1 = arith.index_cast %0 : i32 to index
+          %2 = arith.muli %sub, %c512_i64 : i64
+          %3 = arith.index_cast %2 : i64 to index
+          %4 = arith.addi %1, %3 : index
+          %reinterpret_cast = memref.reinterpret_cast %O to offset: [%4], sizes: [1], strides: [1] : memref<?xf32> to memref<1xf32, strided<[1], offset: ?>>
+          %intptr = memref.extract_aligned_pointer_as_index %reinterpret_cast : memref<1xf32, strided<[1], offset: ?>> -> index
+          %base_buffer, %offset, %sizes, %strides = memref.extract_strided_metadata %reinterpret_cast : memref<1xf32, strided<[1], offset: ?>> -> memref<f32>, index, index, index
+          %5 = arith.muli %offset, %c4 : index
+          %6 = arith.addi %intptr, %5 : index
+          %7 = arith.index_cast %6 : index to i64
+          %c64_0 = arith.constant 64 : index
+          %8 = arith.index_cast %c0 : index to i64
+          %c4_i64 = arith.constant 4 : i64
+          %9 = arith.muli %8, %c4_i64 : i64
+          %10 = arith.addi %7, %9 : i64
+          %11 = hivm.hir.pointer_cast(%10) [%c64_0] : memref<?xf32, #hivm.address_space<gm>>
+          annotation.mark %11 {address_space = #hivm.address_space<gm>} : memref<?xf32, #hivm.address_space<gm>>
+          %reinterpret_cast_1 = memref.reinterpret_cast %11 to offset: [0], sizes: [8, 64], strides: [64, 1] : memref<?xf32, #hivm.address_space<gm>> to memref<8x64xf32, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>
+          hivm.hir.store ins(%out : memref<8x64xf32, #hivm.address_space<ub>>) outs(%reinterpret_cast_1 : memref<8x64xf32, strided<[64, 1], offset: ?>, #hivm.address_space<gm>>)
+          scope.return
+        } {hivm.required_stage = 4 : i32, hivm.task_name = "store", hivm.tcore_type = #hivm.tcore_type<VECTOR>}
+      }
+      scope.return
+    } {hivm.schedule_domain = "auto", hivm.schedule_state = "logical"}
+    return
+  }
+}
