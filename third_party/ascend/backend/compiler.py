@@ -693,7 +693,15 @@ def try_compile_with_config(linalg: str, ub_config: Dict[str, Any], metadata: di
         return (False, str(e))
 
 
+def _reject_unresolved_tla_schedule(linalg: str):
+    if "hivm.schedule_domain" in linalg or "hivm.task_name" in linalg:
+        raise RuntimeError("TLA task/stage annotations are supported through ttadapter only; "
+                           "an NPU-IR schedule solver and synchronization lowering are required "
+                           "before device compilation")
+
+
 def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
+    _reject_unresolved_tla_schedule(linalg)
     linalg, metadata = _parse_linalg_metadata(linalg, metadata)
     _finalize_program_launch_policy(metadata, opt)
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -931,6 +939,7 @@ def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
 
 
 def linalg_to_bin_enable_npu_compile_A2_A3(linalg: str, metadata, opt):
+    _reject_unresolved_tla_schedule(linalg)
     linalg, metadata = _parse_linalg_metadata(linalg, metadata)
     _finalize_program_launch_policy(metadata, opt)
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1470,6 +1479,7 @@ def _normalize_bishengir_simt_optimization_for_context(options: NPUOptions, raw_
 
 
 def ttir_to_npubin(mod, metadata, opt):
+    _reject_unresolved_tla_schedule(str(mod))
     _export_program_grid_metadata(mod, metadata, require_row_contract=True)
     ttir_code = _serialize_module(mod, opt)
     metadata = _parse_ttir_metadata(ttir_code, metadata)
