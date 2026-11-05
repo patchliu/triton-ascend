@@ -8,7 +8,7 @@ in ``CodeGenerator.__init__`` by the patch) before any kernel compiles.
 """
 
 from .code_generator import handle_scope_with
-from .scope import vector, simd, cube, schedule
+from .scope import vector, simd, cube
 
 __all__ = ["TLA_WITH_DISPATCH", "register_with_dispatch"]
 
@@ -17,7 +17,6 @@ TLA_WITH_DISPATCH = {
     vector: handle_scope_with,
     simd: handle_scope_with,
     cube: handle_scope_with,
-    schedule: handle_scope_with,
     vector.task: handle_scope_with,
     cube.task: handle_scope_with,
 }

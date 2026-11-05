@@ -20,56 +20,55 @@ from utils.tla_test_utils import compile_offline, lower_offline
 
 @tla.jit
 def attention_stages(Q, K, V, O, TILES: tl.constexpr):
-    with tla.scope.schedule("auto"):
-        for t in tl.range(TILES):
-            q = tla.alloc((4, 1, 16, 16), tl.bfloat16, space="l1")
-            k = tla.alloc((4, 8, 16, 16), tl.bfloat16, space="l1")
-            v = tla.alloc((4, 8, 16, 16), tl.bfloat16, space="l1")
-            p = tla.alloc((8, 1, 16, 16), tl.bfloat16, space="l1")
-            qk = tla.alloc((8, 1, 16, 16), tl.float32, space="l0c")
-            pv = tla.alloc((4, 1, 16, 16), tl.float32, space="l0c")
-            score = tla.alloc((8, 128), tl.float32, space="ub")
-            prob = tla.alloc((8, 9 * 16), tl.bfloat16, space="ub")
-            out = tla.alloc((8, 64), tl.float32, space="ub")
-            sub = tla.sub_block_id()
+    for t in tla.pipeline(TILES):
+        q = tla.alloc((4, 1, 16, 16), tl.bfloat16, space="l1")
+        k = tla.alloc((4, 8, 16, 16), tl.bfloat16, space="l1")
+        v = tla.alloc((4, 8, 16, 16), tl.bfloat16, space="l1")
+        p = tla.alloc((8, 1, 16, 16), tl.bfloat16, space="l1")
+        qk = tla.alloc((8, 1, 16, 16), tl.float32, space="l0c")
+        pv = tla.alloc((4, 1, 16, 16), tl.float32, space="l0c")
+        score = tla.alloc((8, 128), tl.float32, space="ub")
+        prob = tla.alloc((8, 9 * 16), tl.bfloat16, space="ub")
+        out = tla.alloc((8, 64), tl.float32, space="ub")
+        sub = tla.sub_block_id()
 
-            with tla.scope.cube().task("load_qk", stage=0):
-                tla.load_gm_to_l1(tla.view(Q + t * 16 * 64, (16, 64)), q)
-                tla.load_gm_to_l1(tla.view(K, (128, 64)), k)
-            with tla.scope.cube().task("load_v", stage=0):
-                tla.load_gm_to_l1(tla.view(V, (128, 64)), v)
-            with tla.scope.cube().task("qk", stage=1):
-                tla.cube.mmad(q, k, qk, transpose_b=True, clear_accum=True)
-            with tla.scope.cube().task("score", stage=1):
-                tla.copy_l0c_to_ub(
-                    qk, score,
-                    tla.FixpipeL0C2UBParams(dma_mode=tla.FixpipeDMAMode.NZ2ND,
-                                            dual_dst_mode=tla.FixpipeDualDstMode.ROW_SPLIT, sub_block_idx=None))
-            with tla.scope.vector().task("softmax", stage=2, order=1):
-                with tla.scope.simd():
-                    for row in tl.range(8):
-                        x0 = tla.simd.vmuls(tla.simd.vlds(score[row, 0]), 0.125)
-                        x1 = tla.simd.vmuls(tla.simd.vlds(score[row, 64]), 0.125)
-                        maximum = tla.simd.vreduce_max(tla.simd.vmax(x0, x1))
-                        e0 = tla.simd.vexp(tla.simd.vsub(x0, maximum))
-                        e1 = tla.simd.vexp(tla.simd.vsub(x1, maximum))
-                        total = tla.simd.vbroadcast(tla.simd.vreduce_sum(tla.simd.vadd(e0, e1)))
-                        p0 = tla.simd.vtruncf(tla.simd.vdiv(e0, total), tl.bfloat16)
-                        p1 = tla.simd.vtruncf(tla.simd.vdiv(e1, total), tl.bfloat16)
-                        packed, unused = tla.simd.vdintlv(p0, p1)
-                        tla.simd.vsstb(packed, prob[0, row * 16], 9 * 16)
-            with tla.scope.vector().task("prob", stage=2):
-                tla.copy_ub_to_l1(tla.view(prob, (8, 8 * 16)),
-                                  tla.view(tla.reshape(p, (8, 16 * 16)), (8, 8 * 16), offsets=(0, sub * 8 * 16)))
-            with tla.scope.cube().task("pv", stage=3):
-                tla.cube.mmad(p, v, pv, clear_accum=True)
-            with tla.scope.cube().task("output", stage=3):
-                tla.copy_l0c_to_ub(
-                    pv, out,
-                    tla.FixpipeL0C2UBParams(dma_mode=tla.FixpipeDMAMode.NZ2ND,
-                                            dual_dst_mode=tla.FixpipeDualDstMode.ROW_SPLIT, sub_block_idx=None))
-            with tla.scope.vector().task("store", stage=4):
-                tla.store_ub_to_gm(out, tla.view(O + t * 16 * 64 + sub * 8 * 64, (8, 64)))
+        with tla.scope.cube().task("load_qk", stage=0):
+            tla.load_gm_to_l1(tla.view(Q + t * 16 * 64, (16, 64)), q)
+            tla.load_gm_to_l1(tla.view(K, (128, 64)), k)
+        with tla.scope.cube().task("load_v", stage=0):
+            tla.load_gm_to_l1(tla.view(V, (128, 64)), v)
+        with tla.scope.cube().task("qk", stage=1):
+            tla.cube.mmad(q, k, qk, transpose_b=True, clear_accum=True)
+        with tla.scope.cube().task("score", stage=1):
+            tla.copy_l0c_to_ub(
+                qk, score,
+                tla.FixpipeL0C2UBParams(dma_mode=tla.FixpipeDMAMode.NZ2ND,
+                                        dual_dst_mode=tla.FixpipeDualDstMode.ROW_SPLIT, sub_block_idx=None))
+        with tla.scope.vector().task("softmax", stage=2, order=1):
+            with tla.scope.simd():
+                for row in tl.range(8):
+                    x0 = tla.simd.vmuls(tla.simd.vlds(score[row, 0]), 0.125)
+                    x1 = tla.simd.vmuls(tla.simd.vlds(score[row, 64]), 0.125)
+                    maximum = tla.simd.vreduce_max(tla.simd.vmax(x0, x1))
+                    e0 = tla.simd.vexp(tla.simd.vsub(x0, maximum))
+                    e1 = tla.simd.vexp(tla.simd.vsub(x1, maximum))
+                    total = tla.simd.vbroadcast(tla.simd.vreduce_sum(tla.simd.vadd(e0, e1)))
+                    p0 = tla.simd.vtruncf(tla.simd.vdiv(e0, total), tl.bfloat16)
+                    p1 = tla.simd.vtruncf(tla.simd.vdiv(e1, total), tl.bfloat16)
+                    packed, unused = tla.simd.vdintlv(p0, p1)
+                    tla.simd.vsstb(packed, prob[0, row * 16], 9 * 16)
+        with tla.scope.vector().task("prob", stage=2):
+            tla.copy_ub_to_l1(tla.view(prob, (8, 8 * 16)),
+                              tla.view(tla.reshape(p, (8, 16 * 16)), (8, 8 * 16), offsets=(0, sub * 8 * 16)))
+        with tla.scope.cube().task("pv", stage=3):
+            tla.cube.mmad(p, v, pv, clear_accum=True)
+        with tla.scope.cube().task("output", stage=3):
+            tla.copy_l0c_to_ub(
+                pv, out,
+                tla.FixpipeL0C2UBParams(dma_mode=tla.FixpipeDMAMode.NZ2ND,
+                                        dual_dst_mode=tla.FixpipeDualDstMode.ROW_SPLIT, sub_block_idx=None))
+        with tla.scope.vector().task("store", stage=4):
+            tla.store_ub_to_gm(out, tla.view(O + t * 16 * 64 + sub * 8 * 64, (8, 64)))
 
 
 SIGNATURE = dict(Q="*bf16", K="*bf16", V="*bf16", O="*fp32")
@@ -111,7 +110,7 @@ def test_ir(output_dir=None):
 
 @tla.jit
 def task_copy(X, Y, NAME: tl.constexpr, STAGE: tl.constexpr):
-    with tla.scope.schedule():
+    for t in tla.pipeline(2):
         a = tla.alloc((64, ), tl.float32, space="ub")
         with tla.scope.vector().task(NAME, stage=STAGE):
             tla.load_gm_to_ub(tla.view(X, (64, )), a)
@@ -120,11 +119,10 @@ def task_copy(X, Y, NAME: tl.constexpr, STAGE: tl.constexpr):
 
 @pytest.mark.parametrize("name,stage,error", [
     ("", 0, "nonempty"),
-    ("copy", -1, "explicit compile-time integer"),
-    ("copy", True, "explicit compile-time integer"),
-    ("copy", 1.5, "explicit compile-time integer"),
-    ("copy", 64, "explicit compile-time integer"),
-    ("copy", None, "explicit compile-time integer"),
+    ("copy", -1, "compile-time integer"),
+    ("copy", True, "compile-time integer"),
+    ("copy", 1.5, "compile-time integer"),
+    ("copy", 64, "compile-time integer"),
 ])
 def test_invalid_task(name, stage, error):
     with pytest.raises(CompilationError, match=error):
@@ -145,7 +143,7 @@ def test_task_requires_domain():
 
 @tla.jit
 def duplicate_task(X):
-    with tla.scope.schedule():
+    for t in tla.pipeline(2):
         a = tla.alloc((64, ), tl.float32, space="ub")
         with tla.scope.vector().task("load", stage=0):
             tla.load_gm_to_ub(tla.view(X, (64, )), a)
@@ -195,12 +193,11 @@ def test_simd_does_not_own_tasks():
 
 @tla.jit
 def ordered_task_copy(X, Y, ORDER: tl.constexpr):
-    with tla.scope.schedule():
-        for t in tl.range(2):
-            tile = tla.alloc((64,), tl.float32, space="ub")
-            with tla.scope.vector().task("copy", stage=0, order=ORDER):
-                tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
-                tla.store_ub_to_gm(tile, tla.view(Y + t * 64, (64,)))
+    for t in tla.pipeline(2):
+        tile = tla.alloc((64,), tl.float32, space="ub")
+        with tla.scope.vector().task("copy", stage=0, order=ORDER):
+            tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
+            tla.store_ub_to_gm(tile, tla.view(Y + t * 64, (64,)))
 
 
 @pytest.mark.parametrize("order", [None, 0, 7, 2**31 - 1])
@@ -218,3 +215,82 @@ def test_task_order_ir(order):
 def test_invalid_task_order(order):
     with pytest.raises(CompilationError, match="task order must be"):
         compile_offline(ordered_task_copy, dict(X="*fp32", Y="*fp32"), dict(ORDER=order))
+
+
+@tla.jit
+def hinted_pipeline(X, STAGE: tl.constexpr, ORDER: tl.constexpr):
+    for t in tla.pipeline(2):
+        tile = tla.alloc((64,), tl.float32, space="ub")
+        with tla.scope.vector().task("load", stage=STAGE, order=ORDER):
+            tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
+
+
+@pytest.mark.parametrize("stage,order", [(None, None), (None, 2), (1, None), (1, 2)])
+def test_optional_pipeline_hints(stage, order):
+    module, ctx = compile_offline(hinted_pipeline, dict(X="*fp32"), dict(STAGE=stage, ORDER=order))
+    text = str(lower_offline(module, ctx))
+    assert task_contract(text) == [("load", stage)]
+    assert ("hivm.pipeline_stage" in text) == (stage is not None)
+    assert ("hivm.task_order" in text) == (order is not None)
+    assert re.search(r"\bhivm\.pipeline(?:[,}\s])", text)
+    assert "hivm.schedule_domain" not in text
+
+
+@tla.jit
+def unnamed_pipeline_scope(X):
+    for t in tla.pipeline(2):
+        tile = tla.alloc((64,), tl.float32, space="ub")
+        with tla.scope.vector():
+            tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
+
+
+def test_plain_core_scope_is_a_task_hint():
+    module, ctx = compile_offline(unnamed_pipeline_scope, dict(X="*fp32"), {})
+    text = str(lower_offline(module, ctx))
+    tasks = task_contract(text)
+    assert len(tasks) == 1 and tasks[0][0].startswith("__scope_")
+    assert tasks[0][1] is None
+    assert "hivm.task_order" not in text
+    assert not hasattr(tla.scope, "schedule")
+
+
+@tla.jit
+def missing_pipeline_scope(X):
+    for t in tla.pipeline(2):
+        tile = tla.alloc((64,), tl.float32, space="ub")
+        tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
+
+
+@tla.jit
+def direct_simd_pipeline():
+    for t in tla.pipeline(2):
+        with tla.scope.simd():
+            pass
+
+
+@tla.jit
+def nested_pipeline():
+    for t in tla.pipeline(2):
+        for k in tla.pipeline(2):
+            with tla.scope.vector():
+                pass
+
+
+@tla.jit
+def carried_pipeline():
+    acc = tl.full((), 0, tl.int32)
+    for t in tla.pipeline(2):
+        acc += 1
+        with tla.scope.vector():
+            pass
+
+
+@pytest.mark.parametrize("kernel,signature,error", [
+    (missing_pipeline_scope, dict(X="*fp32"), "requires at least one"),
+    (direct_simd_pipeline, {}, "scope hints must be vector"),
+    (nested_pipeline, {}, "nested tla.pipeline"),
+    (carried_pipeline, {}, "loop-carried values"),
+])
+def test_pipeline_structure_errors(kernel, signature, error):
+    with pytest.raises(CompilationError, match=error):
+        compile_offline(kernel, signature, {})

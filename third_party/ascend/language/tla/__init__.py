@@ -25,13 +25,13 @@ from the TLA repo's SIMD VF additions.  It does **not** reuse the existing
 ``al``/``bl`` general interfaces (different programming paradigm).
 
 Exports: ``alloc_buffer``/``alloc`` (on-chip buffer + versions),
-``copy`` (GM<->buffer), ``view`` (GM view), ``scope`` (core-mode scopes:
+``copy`` (GM<->buffer), ``view`` (GM view), ``pipeline`` (hinted loops), ``scope`` (core-mode scopes:
 ``tla.scope.simd()`` / ``tla.scope.cube()``),
 ``simd`` (vector-register ops), ``annotate_buffer_versions``.
 """
 
 from .core import buffer, buffer_type, vector, vector_type
-from .scope import scope
+from .scope import scope, pipeline
 from .alloc import alloc_buffer, alloc
 from .copy import copy
 from .dma import (
@@ -144,6 +144,7 @@ __all__ = [
 
     # core-mode scopes (scope.simd / scope.cube)
     "scope",
+    "pipeline",
 
     # math helpers / diagnostics
     "math",
