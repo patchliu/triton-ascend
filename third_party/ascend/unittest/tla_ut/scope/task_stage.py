@@ -15,7 +15,8 @@ import pytest
 from triton.compiler.errors import CompilationError
 import triton.language as tl
 import triton.language.extra.tla as tla
-from utils.tla_test_utils import compile_offline, lower_offline
+from utils.tla_test_utils import (compile_offline, lower_offline,
+                                  check_compile_artifacts, get_stages)
 
 
 @tla.jit
@@ -294,3 +295,65 @@ def carried_pipeline():
 def test_pipeline_structure_errors(kernel, signature, error):
     with pytest.raises(CompilationError, match=error):
         compile_offline(kernel, signature, {})
+
+
+TILES = 3
+ROWS = 16
+K_ROWS = 128
+COLS = 64
+
+
+def _inputs():
+    import torch
+    q = torch.randn(TILES * ROWS * COLS, dtype=torch.float32, device="npu").to(torch.bfloat16)
+    k = torch.randn(K_ROWS * COLS, dtype=torch.float32, device="npu").to(torch.bfloat16)
+    v = torch.randn(K_ROWS * COLS, dtype=torch.float32, device="npu").to(torch.bfloat16)
+    o = torch.zeros(TILES * ROWS * COLS, dtype=torch.float32, device="npu")
+    return q, k, v, o
+
+
+def _reference(q, k, v):
+    """softmax(Q K^T / 8) V with P rounded to BF16, computed in FP32."""
+    import torch
+    qt = q.to(torch.float32).reshape(TILES, ROWS, COLS)
+    kt = k.to(torch.float32).reshape(K_ROWS, COLS)
+    vt = v.to(torch.float32).reshape(K_ROWS, COLS)
+    s = torch.softmax((qt @ kt.transpose(-1, -2)) * 0.125, dim=-1)
+    p = s.to(torch.bfloat16).to(torch.float32)
+    return (p @ vt).reshape(-1)
+
+
+def _launch():
+    q, k, v, o = _inputs()
+    attention_stages[(1, )](q, k, v, o, TILES=TILES)
+    return o, _reference(q.cpu(), k.cpu(), v.cpu())
+
+
+def test_compile():
+    _launch()
+    artifacts = check_compile_artifacts()
+    assert artifacts, "no .o/.npubin artifact in TRITON_CACHE_DIR"
+    print("COMPILE PASS: task_stage artifacts", len(artifacts), "->", artifacts[0])
+
+
+def test_run():
+    import torch
+    out, ref = _launch()
+    torch.testing.assert_close(out.cpu(), ref, rtol=2e-2, atol=2e-2)
+    print("TASK_STAGE OK: softmax(Q K^T / 8) V through the task/stage pipeline")
+
+
+def main():
+    do_ir, do_compile, do_run = get_stages()
+    if do_ir:
+        test_ir()
+    if do_compile:
+        test_compile()
+    if do_run:
+        test_run()
+    print("ALL PASS: task_stage", "ir" if do_ir else "",
+          "compile" if do_compile else "", "run" if do_run else "")
+
+
+if __name__ == "__main__":
+    main()

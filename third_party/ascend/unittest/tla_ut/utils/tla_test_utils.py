@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 from triton.language.extra.tla.compiler import ast_to_ttir, lower_ttir
-from triton._C.libtriton import ir, buffer_ir, passes
+from triton._C.libtriton import ir, buffer_ir, passes, ascend
 from triton._C.libtriton.ascend import ir as ascend_ir
 
 # Test glue only: ``tla.jit`` is a function, but the first decoration runs
@@ -81,6 +81,9 @@ def make_context():
     ir.load_dialects(ctx)
     buffer_ir.load_dialects(ctx)
     ascend_ir.load_dialects(ctx)
+    # ``ascend_ir`` only registers hivm/ave/scope/annotation; the TritonAscend
+    # dialect (e.g. ``ascend.tla_pointer_view``) comes from this entry point.
+    ascend.load_dialects(ctx)
     return ctx
 
 
