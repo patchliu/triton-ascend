@@ -793,6 +793,15 @@ struct DotScaledConverter : public OpConversionPattern<triton::DotScaledOp> {
                   ConversionPatternRewriter &rewriter) const override;
 };
 
+class TlaPointerViewConverter
+    : public OpConversionPattern<triton::ascend::TlaPointerViewOp> {
+public:
+  using OpConversionPattern::OpConversionPattern;
+  LogicalResult
+  matchAndRewrite(triton::ascend::TlaPointerViewOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override;
+};
+
 class PtrToIntConverter : public OpConversionPattern<triton::PtrToIntOp> {
 public:
   using OpConversionPattern<triton::PtrToIntOp>::OpConversionPattern;

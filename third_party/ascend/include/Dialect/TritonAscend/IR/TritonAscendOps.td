@@ -34,6 +34,21 @@ include "ascend/include/Dialect/TritonAscend/IR/TritonAscendAttrDefs.td"
 class TT_Ascend_Op<string mnemonic, list<Trait> traits = []> :
   Op<TritonAscend_Dialect, mnemonic, traits>;
 
+def TlaPointerViewOp : TT_Ascend_Op<"tla_pointer_view", [Pure]> {
+  let summary = "Create a GM buffer view at an element offset from a scalar pointer";
+  let description = [{
+    Describes an alias without loading or allocating memory. The result type
+    carries static sizes and strides; linear is relative to the input pointer
+    in elements. Lowering adds the input descriptor's offset before creating
+    a memref.reinterpret_cast, preserving the underlying storage provenance.
+    GM uses the default memory space until memory scope inference.
+  }];
+  let arguments = (ins TT_Ptr:$src, Index:$linear);
+  let results = (outs AnyMemRef:$result);
+  let assemblyFormat = "$src `,` $linear attr-dict `:` type($src) `->` type($result)";
+  let hasVerifier = 1;
+}
+
 
 //
 // Interfaces
