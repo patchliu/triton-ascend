@@ -3500,6 +3500,53 @@ IntToPtrConverter::matchAndRewrite(triton::IntToPtrOp op, OpAdaptor adaptor,
 }
 
 LogicalResult
+TlaPointerViewConverter::matchAndRewrite(
+    triton::ascend::TlaPointerViewOp op, OpAdaptor adaptor,
+    ConversionPatternRewriter &rewriter) const {
+  Value source = unwrapPointerDescriptorMaterialization(adaptor.getSrc());
+  auto sourceType = dyn_cast<MemRefType>(source.getType());
+  auto resultType = cast<MemRefType>(op.getResult().getType());
+  if (!sourceType ||
+      sourceType.getElementType() != resultType.getElementType() ||
+      sourceType.getMemorySpace() != resultType.getMemorySpace())
+    return rewriter.notifyMatchFailure(
+        op, "pointer descriptor must preserve the element type and GM space");
+
+  SmallVector<int64_t> sourceStrides;
+  int64_t sourceOffset;
+  if (failed(getStridesAndOffset(sourceType, sourceStrides, sourceOffset)))
+    return rewriter.notifyMatchFailure(op, "requires a strided pointer descriptor");
+
+  auto loc = op.getLoc();
+  Value offset;
+  if (auto view = source.getDefiningOp<memref::ReinterpretCastOp>()) {
+    // A reinterpret offset already includes the full displacement from the
+    // aligned base. Reuse it once, without accumulating earlier view offsets.
+    int64_t viewOffset = view.getStaticOffsets().front();
+    if (ShapedType::isDynamic(viewOffset))
+      offset = view.getOffsets().front();
+    else
+      offset = rewriter.create<arith::ConstantIndexOp>(loc, viewOffset);
+    source = view.getSource();
+  } else if (ShapedType::isDynamic(sourceOffset)) {
+    offset = rewriter.create<memref::ExtractStridedMetadataOp>(loc, source)
+                 .getOffset();
+  } else {
+    offset = rewriter.create<arith::ConstantIndexOp>(loc, sourceOffset);
+  }
+  offset = rewriter.createOrFold<arith::AddIOp>(loc, offset, adaptor.getLinear());
+  auto strides = resultType.getStridesAndOffset().first;
+  // Opaque scalar-pointer carriers keep their existing pointer_cast root.
+  // Argument-backed pointers remain a view chain that TLA scheduling can trace.
+  rewriter.replaceOpWithNewOp<memref::ReinterpretCastOp>(
+      op, resultType, source, ValueRange{offset}, ValueRange{}, ValueRange{},
+      rewriter.getDenseI64ArrayAttr({ShapedType::kDynamic}),
+      rewriter.getDenseI64ArrayAttr(resultType.getShape()),
+      rewriter.getDenseI64ArrayAttr(strides));
+  return success();
+}
+
+LogicalResult
 PtrToIntConverter::matchAndRewrite(triton::PtrToIntOp op, OpAdaptor adaptor,
                                    ConversionPatternRewriter &rewriter) const {
   FailureOr<Value> address =

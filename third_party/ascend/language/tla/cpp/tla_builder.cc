@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 // TLA-specific Ascend IR builder bindings.
 #include "Utils/AscendNPUIROpBuilder.h"
+#include "ascend/include/Dialect/TritonAscend/IR/TritonAscendDialect.h"
 
 #include "pybind11/pybind11.h"
 #include <pybind11/stl.h>
@@ -967,10 +968,14 @@ void init_tla_builder(py::module &&m) {
                throw std::invalid_argument(
                    "TLA buffer shape and strides must have the same rank");
              auto *ctx = self.getBuilder().getContext();
+             // Match converted Triton pointer arguments. GM is inferred from
+             // the argument/view chain; local buffers retain explicit spaces.
              return MemRefType::get(
                  shape, elementType,
                  tlaBufferLayout(ctx, shape, strides, offset),
-                 hivm::AddressSpaceAttr::get(ctx, *memorySpace));
+                 *memorySpace == hivm::AddressSpace::GM
+                     ? Attribute{}
+                     : hivm::AddressSpaceAttr::get(ctx, *memorySpace));
            })
       .def("create_tla_alloc",
            [](TLABuilder &self, Type type) -> Value {
@@ -989,6 +994,17 @@ void init_tla_builder(py::module &&m) {
                throw std::invalid_argument(
                    "TLA bind requires an i64 address operand");
              return self.create<hivm::PointerCastOp>(memrefType, addr)
+                 .getResult();
+           })
+      .def("create_tla_pointer_view",
+           [](TLABuilder &self, Value source, Value linear,
+              Type resultType) -> Value {
+             if (!linear.getType().isIndex())
+               linear = self.create<arith::IndexCastOp>(
+                   self.getBuilder().getIndexType(), linear);
+             return self
+                 .create<triton::ascend::TlaPointerViewOp>(resultType, source,
+                                                          linear)
                  .getResult();
            })
       .def("create_tla_subview",
