@@ -25,7 +25,7 @@ The NPU-IR scheduling backend must resolve them before device compilation.
 from dataclasses import dataclass
 from triton.language.core import _unwrap_if_constexpr
 
-__all__ = ["scope", "vector", "simd", "cube", "schedule"]
+__all__ = ["scope", "vector", "simd", "cube", "pipeline"]
 
 
 @dataclass(frozen=True)
@@ -40,36 +40,34 @@ class _TaskScope:
             raise ValueError("task() is only supported on scope.vector() and scope.cube()")
         if not isinstance(self.name, str) or not self.name:
             raise ValueError("task name must be a nonempty compile-time string")
-        if type(self.stage) is not int or not 0 <= self.stage < 64:
-            raise ValueError("task stage must be an explicit compile-time integer in [0, 64)")
+        if self.stage is not None and (type(self.stage) is not int or not 0 <= self.stage < 64):
+            raise ValueError("task stage must be a compile-time integer in [0, 64) or None")
         if self.order is not None and (type(self.order) is not int or not 0 <= self.order < 2**31):
             raise ValueError("task order must be a nonnegative compile-time i32 integer or None")
 
     def mlir_attrs(self, builder):
         attrs = self.kind.mlir_attrs(builder)
         attrs["hivm.task_name"] = builder.get_string_attr(self.name)
-        attrs["hivm.pipeline_stage"] = builder.parse_attr(f"{self.stage} : i32")
+        if self.stage is not None:
+            attrs["hivm.pipeline_stage"] = builder.parse_attr(f"{self.stage} : i32")
         if self.order is not None:
             attrs["hivm.task_order"] = builder.parse_attr(f"{self.order} : i32")
         return attrs
 
 
-@dataclass(frozen=True)
-class schedule:
-    """Fixed-stage pipeline region; stage legality is checked by NPU-IR.
+class pipeline:
+    """Loop marker: ``for i in tla.pipeline(stop)`` starts a pipeline domain.
 
-    The legacy ``auto`` spelling requests automatic pipeline materialization,
-    not automatic stage selection. Every task must supply its stage.
+    The current interface uses a zero lower bound and unit step. Each pipeline
+    needs direct vector/cube scope hints; task names, stages and orders can be
+    specified on those scopes. This marker is lowered by the TLA frontend.
     """
-    mode: str = "auto"
 
-    def __post_init__(self):
-        object.__setattr__(self, "mode", _unwrap_if_constexpr(self.mode))
-        if type(self.mode) is not str or self.mode != "auto":
-            raise ValueError("only schedule('auto') is currently supported")
+    def __init__(self, stop):
+        self.stop = stop
 
-    def mlir_attrs(self, builder):
-        return {"hivm.pipeline": builder.get_unit_attr()}
+    def __iter__(self):
+        raise RuntimeError("tla.pipeline can only be used in a @tla.jit for loop")
 
 
 class scope:
@@ -96,10 +94,10 @@ class _TaskScopeKind(scope):
 
     @classmethod
     def task(cls, name, *, stage=None, order=None):
-        """Name a task and specify its fixed pipeline stage in [0, 64).
+        """Name a task and optionally specify its stage and mainloop order.
 
         A task may contain several pipes; the scope itself is not a barrier.
-        Missing stages are rejected rather than inferred or defaulted to zero.
+        Missing stages are left unspecified, never defaulted to zero.
         Optional order is a mainloop ordering hint, independent of stage.
         It is passed through as metadata; this interface does not reorder ops.
         """
@@ -163,5 +161,3 @@ class cube(_TaskScopeKind):
 scope.vector = vector
 scope.simd = simd
 scope.cube = cube
-
-scope.schedule = schedule

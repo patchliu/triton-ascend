@@ -29,6 +29,7 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Utils/ReshapeOpsUtils.h"
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
 #include "mlir/IR/Block.h"
@@ -1337,20 +1338,40 @@ void init_tla_builder(py::module &&m) {
              scopeOp->setAttrs(attrs);
              return OpState(scopeOp);
            })
+      .def("create_tla_pipeline",
+           [](TLABuilder &self, Value stop) {
+             auto &builder = self.getBuilder();
+             if (!stop.getType().isInteger(32) && !stop.getType().isInteger(64))
+               throw py::value_error("pipeline stop must be i32 or i64");
+             Value lb = self.create<arith::ConstantIndexOp>(0);
+             Value ub =
+                 self.create<arith::IndexCastOp>(builder.getIndexType(), stop);
+             Value step = self.create<arith::ConstantIndexOp>(1);
+             auto domain = self.create<scope::ScopeOp>(TypeRange{});
+             domain->setAttr("hivm.pipeline", builder.getUnitAttr());
+             Block *body = builder.createBlock(&domain.getRegion());
+             auto loop = self.create<scf::ForOp>(lb, ub, step);
+             builder.setInsertionPointToEnd(body);
+             self.create<scope::ReturnOp>(ValueRange{});
+             // Python emits the body and its yield after scope/carry checks.
+             loop.getBody()->getTerminator()->erase();
+             builder.setInsertionPointToStart(loop.getBody());
+             Value iv = self.create<arith::IndexCastOp>(builder.getI64Type(),
+                                                        loop.getInductionVar());
+             return std::make_pair(loop, iv);
+           })
       // Ensures the TLA scope has its entry block; the cann-shared
       // create_scope_op makes its own, so the emplace stays here to avoid
       // two blocks in non-TLA scopes.
       // pybind11 wraps Block in unique_ptr; reference keeps it alive.
       .def(
           "get_scope_entry_block",
-          [](TLABuilder &self, OpState op) -> Block
-                                               * {
-                                                 Region &region =
-                                                     op->getRegion(0);
-                                                 if (region.empty())
-                                                   region.emplaceBlock();
-                                                 return &region.front();
-                                               },
+          [](TLABuilder &self, OpState op) -> Block * {
+            Region &region = op->getRegion(0);
+            if (region.empty())
+              region.emplaceBlock();
+            return &region.front();
+          },
           py::return_value_policy::reference)
       // Set an attribute on an existing operation. module.get_function is not
       // usable for the ttadapter entry: triton_to_linalg lowers it from
