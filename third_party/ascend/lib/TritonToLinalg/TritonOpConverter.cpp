@@ -3514,7 +3514,7 @@ TlaPointerViewConverter::matchAndRewrite(
 
   SmallVector<int64_t> sourceStrides;
   int64_t sourceOffset;
-  if (failed(getStridesAndOffset(sourceType, sourceStrides, sourceOffset)))
+  if (failed(sourceType.getStridesAndOffset(sourceStrides, sourceOffset)))
     return rewriter.notifyMatchFailure(op, "requires a strided pointer descriptor");
 
   auto loc = op.getLoc();

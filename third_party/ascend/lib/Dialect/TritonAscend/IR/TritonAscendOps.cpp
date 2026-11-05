@@ -33,7 +33,7 @@ LogicalResult TlaPointerViewOp::verify() {
     return emitOpError("requires a nonempty static shape with positive dimensions");
   SmallVector<int64_t> strides;
   int64_t offset;
-  if (failed(getStridesAndOffset(type, strides, offset)) ||
+  if (failed(type.getStridesAndOffset(strides, offset)) ||
       !ShapedType::isDynamic(offset) ||
       llvm::any_of(strides, [](int64_t stride) { return stride <= 0; }))
     return emitOpError("requires static positive strides and a dynamic offset");
