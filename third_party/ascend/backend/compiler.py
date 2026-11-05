@@ -236,7 +236,11 @@ def _finalize_program_launch_policy(metadata, opt):
             raise RuntimeError("persistent program-grid transform lacks coverage/ABI verification")
         ptsm_cap_authorized = True
 
-    if opt.is_pure_simt:
+    if getattr(opt, "enable_tla_mode", False):
+        # Affinity does not emit a grid-stride AutoBlockify loop. The launcher
+        # must therefore retain the full logical grid.
+        auto_blockify_enabled = False
+    elif opt.is_pure_simt:
         auto_blockify_enabled = _is_auto_map_parallel_blocks_enabled() and not row_coalescing_applied
     else:
         auto_blockify_enabled = (_is_auto_map_parallel_blocks_enabled() and not has_auto_blockify_blacklist_op
@@ -721,15 +725,17 @@ def try_compile_with_config(linalg: str, ub_config: Dict[str, Any], metadata: di
         return (False, str(e))
 
 
-def _reject_unresolved_tla_schedule(linalg: str):
-    if "hivm.schedule_domain" in linalg or "hivm.task_name" in linalg:
-        raise RuntimeError("TLA task/stage annotations are supported through ttadapter only; "
-                           "an NPU-IR schedule solver and synchronization lowering are required "
-                           "before device compilation")
+def _check_tla_pipeline_support(linalg: str, opt=None, *, allow_pipeline=False):
+    if any(attr in linalg for attr in ("hivm.schedule_domain", "hivm.schedule_state", "hivm.required_stage")):
+        raise RuntimeError("obsolete TLA schedule attributes; regenerate IR with hivm.pipeline and hivm.pipeline_stage")
+    has_pipeline = any(attr in linalg for attr in ("hivm.pipeline", "hivm.task_name"))
+    if has_pipeline and not (allow_pipeline and getattr(opt, "enable_tla_mode", False)):
+        raise RuntimeError("TLA pipelines require the RegBase ttadapter path with enable_tla_mode and "
+                           "a matching NPU-IR fixed-stage implementation")
 
 
 def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
-    _reject_unresolved_tla_schedule(linalg)
+    _check_tla_pipeline_support(linalg, opt, allow_pipeline=True)
     linalg, metadata = _parse_linalg_metadata(linalg, metadata)
     _finalize_program_launch_policy(metadata, opt)
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -891,6 +897,7 @@ def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
         if metadata["auto_blockify_enabled"]:
             _compile_option_list += ["--enable-auto-blockify-loop"]
         npu_compiler_path, env = _get_npucompiler_path()
+        _check_tla_pipeline_support(linalg, opt, allow_pipeline=npu_compiler_path.endswith("bishengir-compile"))
         if npu_compiler_path.endswith("bishengir-compile"):
             _compile_option_list += [
                 "--enable-hfusion-compile=true",
@@ -967,7 +974,7 @@ def linalg_to_bin_enable_npu_compile_910_95(linalg: str, metadata, opt):
 
 
 def linalg_to_bin_enable_npu_compile_A2_A3(linalg: str, metadata, opt):
-    _reject_unresolved_tla_schedule(linalg)
+    _check_tla_pipeline_support(linalg, opt)
     linalg, metadata = _parse_linalg_metadata(linalg, metadata)
     _finalize_program_launch_policy(metadata, opt)
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1510,7 +1517,7 @@ def _normalize_bishengir_simt_optimization_for_context(options: NPUOptions, raw_
 
 
 def ttir_to_npubin(mod, metadata, opt):
-    _reject_unresolved_tla_schedule(str(mod))
+    _check_tla_pipeline_support(str(mod), opt)
     _export_program_grid_metadata(mod, metadata, require_row_contract=True)
     ttir_code = _serialize_module(mod, opt)
     metadata = _parse_ttir_metadata(ttir_code, metadata)

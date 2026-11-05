@@ -1,6 +1,7 @@
 """Task/stage frontend contracts and a single-KV-tile attention IR fixture.
 
-IR-only: no schedule solver or automatic synchronization has run yet.
+Frontend IR-only: no pipeline materialization or synchronization has run.
+The SIMD row loop is outside the current NPU-IR straight-line task subset.
 The kernel computes softmax(Q K^T / 8) V for Q[16,64], K[128,64], V[128,64].
 P is rounded to BF16 before PV; output is FP32. Each loop tile has its own Q/O.
 """
@@ -35,7 +36,7 @@ def attention_stages(Q, K, V, O, TILES: tl.constexpr):
             with tla.scope.cube().task("load_qk", stage=0):
                 tla.load_gm_to_l1(tla.view(Q + t * 16 * 64, (16, 64)), q)
                 tla.load_gm_to_l1(tla.view(K, (128, 64)), k)
-            with tla.scope.cube().task("load_v"):
+            with tla.scope.cube().task("load_v", stage=0):
                 tla.load_gm_to_l1(tla.view(V, (128, 64)), v)
             with tla.scope.cube().task("qk", stage=1):
                 tla.cube.mmad(q, k, qk, transpose_b=True, clear_accum=True)
@@ -44,18 +45,19 @@ def attention_stages(Q, K, V, O, TILES: tl.constexpr):
                     qk, score,
                     tla.FixpipeL0C2UBParams(dma_mode=tla.FixpipeDMAMode.NZ2ND,
                                             dual_dst_mode=tla.FixpipeDualDstMode.ROW_SPLIT, sub_block_idx=None))
-            with tla.scope.simd().task("softmax", stage=2):
-                for row in tl.range(8):
-                    x0 = tla.simd.vmuls(tla.simd.vlds(score[row, 0]), 0.125)
-                    x1 = tla.simd.vmuls(tla.simd.vlds(score[row, 64]), 0.125)
-                    maximum = tla.simd.vreduce_max(tla.simd.vmax(x0, x1))
-                    e0 = tla.simd.vexp(tla.simd.vsub(x0, maximum))
-                    e1 = tla.simd.vexp(tla.simd.vsub(x1, maximum))
-                    total = tla.simd.vbroadcast(tla.simd.vreduce_sum(tla.simd.vadd(e0, e1)))
-                    p0 = tla.simd.vtruncf(tla.simd.vdiv(e0, total), tl.bfloat16)
-                    p1 = tla.simd.vtruncf(tla.simd.vdiv(e1, total), tl.bfloat16)
-                    packed, unused = tla.simd.vdintlv(p0, p1)
-                    tla.simd.vsstb(packed, prob[0, row * 16], 9 * 16)
+            with tla.scope.vector().task("softmax", stage=2, order=1):
+                with tla.scope.simd():
+                    for row in tl.range(8):
+                        x0 = tla.simd.vmuls(tla.simd.vlds(score[row, 0]), 0.125)
+                        x1 = tla.simd.vmuls(tla.simd.vlds(score[row, 64]), 0.125)
+                        maximum = tla.simd.vreduce_max(tla.simd.vmax(x0, x1))
+                        e0 = tla.simd.vexp(tla.simd.vsub(x0, maximum))
+                        e1 = tla.simd.vexp(tla.simd.vsub(x1, maximum))
+                        total = tla.simd.vbroadcast(tla.simd.vreduce_sum(tla.simd.vadd(e0, e1)))
+                        p0 = tla.simd.vtruncf(tla.simd.vdiv(e0, total), tl.bfloat16)
+                        p1 = tla.simd.vtruncf(tla.simd.vdiv(e1, total), tl.bfloat16)
+                        packed, unused = tla.simd.vdintlv(p0, p1)
+                        tla.simd.vsstb(packed, prob[0, row * 16], 9 * 16)
             with tla.scope.vector().task("prob", stage=2):
                 tla.copy_ub_to_l1(tla.view(prob, (8, 8 * 16)),
                                   tla.view(tla.reshape(p, (8, 16 * 16)), (8, 8 * 16), offsets=(0, sub * 8 * 16)))
@@ -71,21 +73,23 @@ def attention_stages(Q, K, V, O, TILES: tl.constexpr):
 
 
 SIGNATURE = dict(Q="*bf16", K="*bf16", V="*bf16", O="*fp32")
-EXPECTED_STAGES = dict(load_qk=0, load_v=None, qk=1, score=1, softmax=2, prob=2, pv=3, output=3, store=4)
+EXPECTED_STAGES = dict(load_qk=0, load_v=0, qk=1, score=1, softmax=2, prob=2, pv=3, output=3, store=4)
 
 
 def task_contract(text):
     """Ignore names/locations while retaining ordered scope attributes and stages."""
     return [(name, int(stage) if stage else None)
-            for stage, name in re.findall(r'(?:hivm.required_stage = (\d+) : i32, )?hivm.task_name = "([^"]+)"', text)]
+            for stage, name in re.findall(r'(?:hivm.pipeline_stage = (\d+) : i32, )?hivm.task_name = "([^"]+)"', text)]
 
 
 def test_ir(output_dir=None):
     module, ctx = compile_offline(attention_stages, SIGNATURE, dict(TILES=3), output_dir=output_dir)
     text = str(lower_offline(module, ctx, output_dir=output_dir))
     assert task_contract(text) == list(EXPECTED_STAGES.items())
-    assert 'hivm.schedule_domain = "auto"' in text
-    assert 'hivm.schedule_state = "logical"' in text
+    assert re.search(r"\bhivm\.pipeline(?:[,}\s])", text)
+    assert "hivm.schedule_domain" not in text and "hivm.schedule_state" not in text
+    assert "hivm.required_stage" not in text and "hivm.preload_fixed_depth" not in text
+    assert 'hivm.task_name = "softmax", hivm.task_order = 1 : i32' in text
     assert text.count("hivm.hir.mmadL1") == 2
     assert text.count("hivm.hir.fixpipe") == 2
     assert text.count("hivm.hir.nd2nz") == 3
@@ -94,6 +98,11 @@ def test_ir(output_dir=None):
     assert "hivm.vector_function" in text
     assert "hivm.preload_num" not in text and "hivm.multi_buffer" not in text
     assert "sync_block" not in text and "tt." not in text
+    # Task boundaries are core scopes; VF attributes belong only to the
+    # nested SIMD scope and must not be combined with task/stage attributes.
+    task_attrs = re.findall(r'\{([^{}\n]*hivm\.task_name[^{}\n]*)\}', text)
+    assert len(task_attrs) == len(EXPECTED_STAGES)
+    assert all("hivm.vector_function" not in attrs and "outline" not in attrs for attrs in task_attrs)
     expected = Path(__file__).with_name("attention_stages.ttadapter.mlir")
     assert task_contract(expected.read_text()) == task_contract(text)
     from triton._C.libtriton import ir
@@ -111,10 +120,11 @@ def task_copy(X, Y, NAME: tl.constexpr, STAGE: tl.constexpr):
 
 @pytest.mark.parametrize("name,stage,error", [
     ("", 0, "nonempty"),
-    ("copy", -1, "nonnegative"),
-    ("copy", True, "nonnegative"),
-    ("copy", 1.5, "nonnegative"),
-    ("copy", 2**31, "nonnegative"),
+    ("copy", -1, "explicit compile-time integer"),
+    ("copy", True, "explicit compile-time integer"),
+    ("copy", 1.5, "explicit compile-time integer"),
+    ("copy", 64, "explicit compile-time integer"),
+    ("copy", None, "explicit compile-time integer"),
 ])
 def test_invalid_task(name, stage, error):
     with pytest.raises(CompilationError, match=error):
@@ -137,9 +147,9 @@ def test_task_requires_domain():
 def duplicate_task(X):
     with tla.scope.schedule():
         a = tla.alloc((64, ), tl.float32, space="ub")
-        with tla.scope.vector().task("load"):
+        with tla.scope.vector().task("load", stage=0):
             tla.load_gm_to_ub(tla.view(X, (64, )), a)
-        with tla.scope.vector().task("load"):
+        with tla.scope.vector().task("load", stage=0):
             tla.load_gm_to_ub(tla.view(X + 64, (64, )), a)
 
 
@@ -148,9 +158,63 @@ def test_duplicate_task():
         compile_offline(duplicate_task, dict(X="*fp32"), {})
 
 
-def test_device_compile_rejects_unresolved_schedule():
-    from triton.backends.ascend.compiler import (linalg_to_bin_enable_npu_compile_910_95,
-                                                 linalg_to_bin_enable_npu_compile_A2_A3, ttir_to_npubin)
-    for compile_binary in (linalg_to_bin_enable_npu_compile_910_95, linalg_to_bin_enable_npu_compile_A2_A3, ttir_to_npubin):
-        with pytest.raises(RuntimeError, match="ttadapter only"):
-            compile_binary('hivm.schedule_domain = "auto"', {}, None)
+@pytest.mark.parametrize("attr", ["hivm.pipeline", "hivm.pipeline_stage = 0 : i32", 'hivm.task_name = "load"'])
+def test_pipeline_compile_gate(attr):
+    from types import SimpleNamespace
+    from triton.backends.ascend.compiler import _check_tla_pipeline_support
+    tla_options = SimpleNamespace(enable_tla_mode=True)
+    _check_tla_pipeline_support(attr, tla_options, allow_pipeline=True)
+    with pytest.raises(RuntimeError, match="RegBase ttadapter"):
+        _check_tla_pipeline_support(attr, tla_options)
+    with pytest.raises(RuntimeError, match="RegBase ttadapter"):
+        _check_tla_pipeline_support(attr, SimpleNamespace(enable_tla_mode=False), allow_pipeline=True)
+
+
+@pytest.mark.parametrize("attr", ["hivm.schedule_domain", "hivm.schedule_state", "hivm.required_stage"])
+def test_old_schedule_attributes_rejected(attr):
+    from types import SimpleNamespace
+    from triton.backends.ascend.compiler import _check_tla_pipeline_support
+    with pytest.raises(RuntimeError, match="obsolete TLA"):
+        _check_tla_pipeline_support(attr, SimpleNamespace(enable_tla_mode=True), allow_pipeline=True)
+
+
+@pytest.mark.parametrize("kind", [tla.scope.vector, tla.scope.cube])
+def test_only_core_scopes_own_tasks(kind):
+    spec = kind().task("compute", stage=1)
+    assert spec.kind is kind
+    assert spec.stage == 1
+
+
+def test_simd_does_not_own_tasks():
+    assert not hasattr(tla.scope.simd(), "task")
+    assert not hasattr(tla.scope(), "task")
+    from triton.language.extra.tla.scope import _TaskScope
+    with pytest.raises(ValueError, match="only supported on"):
+        _TaskScope(tla.scope.simd, "compute", 1)
+
+
+@tla.jit
+def ordered_task_copy(X, Y, ORDER: tl.constexpr):
+    with tla.scope.schedule():
+        for t in tl.range(2):
+            tile = tla.alloc((64,), tl.float32, space="ub")
+            with tla.scope.vector().task("copy", stage=0, order=ORDER):
+                tla.load_gm_to_ub(tla.view(X + t * 64, (64,)), tile)
+                tla.store_ub_to_gm(tile, tla.view(Y + t * 64, (64,)))
+
+
+@pytest.mark.parametrize("order", [None, 0, 7, 2**31 - 1])
+def test_task_order_ir(order):
+    module, ctx = compile_offline(ordered_task_copy, dict(X="*fp32", Y="*fp32"), dict(ORDER=order))
+    text = str(lower_offline(module, ctx))
+    if order is None:
+        assert "hivm.task_order" not in text
+    else:
+        assert f"hivm.task_order = {order} : i32" in text
+    assert task_contract(text) == [("copy", 0)]
+
+
+@pytest.mark.parametrize("order", [-1, True, 1.5, "1", 2**31])
+def test_invalid_task_order(order):
+    with pytest.raises(CompilationError, match="task order must be"):
+        compile_offline(ordered_task_copy, dict(X="*fp32", Y="*fp32"), dict(ORDER=order))

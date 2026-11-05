@@ -33,24 +33,34 @@ class _TaskScope:
     kind: type
     name: str
     stage: object = None
+    order: object = None
 
     def __post_init__(self):
+        if self.kind not in (vector, cube):
+            raise ValueError("task() is only supported on scope.vector() and scope.cube()")
         if not isinstance(self.name, str) or not self.name:
             raise ValueError("task name must be a nonempty compile-time string")
-        if self.stage is not None and (type(self.stage) is not int or not 0 <= self.stage < 2**31):
-            raise ValueError("task stage must be a nonnegative compile-time i32 integer or None")
+        if type(self.stage) is not int or not 0 <= self.stage < 64:
+            raise ValueError("task stage must be an explicit compile-time integer in [0, 64)")
+        if self.order is not None and (type(self.order) is not int or not 0 <= self.order < 2**31):
+            raise ValueError("task order must be a nonnegative compile-time i32 integer or None")
 
     def mlir_attrs(self, builder):
         attrs = self.kind.mlir_attrs(builder)
         attrs["hivm.task_name"] = builder.get_string_attr(self.name)
-        if self.stage is not None:
-            attrs["hivm.required_stage"] = builder.parse_attr(f"{self.stage} : i32")
+        attrs["hivm.pipeline_stage"] = builder.parse_attr(f"{self.stage} : i32")
+        if self.order is not None:
+            attrs["hivm.task_order"] = builder.parse_attr(f"{self.order} : i32")
         return attrs
 
 
 @dataclass(frozen=True)
 class schedule:
-    """Logical automatic schedule region; currently supported through ttadapter only."""
+    """Fixed-stage pipeline region; stage legality is checked by NPU-IR.
+
+    The legacy ``auto`` spelling requests automatic pipeline materialization,
+    not automatic stage selection. Every task must supply its stage.
+    """
     mode: str = "auto"
 
     def __post_init__(self):
@@ -59,10 +69,7 @@ class schedule:
             raise ValueError("only schedule('auto') is currently supported")
 
     def mlir_attrs(self, builder):
-        return {
-            "hivm.schedule_domain": builder.get_string_attr(self.mode), "hivm.schedule_state":
-            builder.get_string_attr("logical")
-        }
+        return {"hivm.pipeline": builder.get_unit_attr()}
 
 
 class scope:
@@ -79,21 +86,27 @@ class scope:
     core_mode = "vector"
 
     @classmethod
-    def task(cls, name, *, stage=None):
-        """Name a task group and optionally constrain its pipeline stage.
-
-        Unspecified stages remain free. A group may contain several pipes;
-        NPU-IR must split it into resource tasks while preserving dependencies.
-        """
-        return _TaskScope(cls, _unwrap_if_constexpr(name), _unwrap_if_constexpr(stage))
-
-    @classmethod
     def mlir_attrs(cls, builder):
         """Attributes stamped on the emitted ``scope.scope`` op."""
         return {"hivm.tcore_type": builder.parse_attr("#hivm.tcore_type<VECTOR>")}
 
 
-class vector(scope):
+class _TaskScopeKind(scope):
+    """Execution-core scopes that can own a pipeline task."""
+
+    @classmethod
+    def task(cls, name, *, stage=None, order=None):
+        """Name a task and specify its fixed pipeline stage in [0, 64).
+
+        A task may contain several pipes; the scope itself is not a barrier.
+        Missing stages are rejected rather than inferred or defaulted to zero.
+        Optional order is a mainloop ordering hint, independent of stage.
+        It is passed through as metadata; this interface does not reorder ops.
+        """
+        return _TaskScope(cls, _unwrap_if_constexpr(name), _unwrap_if_constexpr(stage), _unwrap_if_constexpr(order))
+
+
+class vector(_TaskScopeKind):
     """``with tla.scope.vector():`` -- vector-core region for non-SIMD ops.
 
     A vector scope is the vector core's inline region: it hosts non-SIMD
@@ -112,7 +125,8 @@ class simd(scope):
 
     Emitted as a manual vector function: the bishengir ``outline-scope`` pass
     extracts this marked scope into ``func.func`` + ``func.call``. See
-    :meth:`mlir_attrs` for the role of each stamped attribute.
+    :meth:`mlir_attrs` for the role of each stamped attribute. SIMD scopes do
+    not own tasks; nest them inside ``scope.vector().task(...)`` instead.
     """
 
     core_mode = "vector"
@@ -131,7 +145,7 @@ class simd(scope):
         return attrs
 
 
-class cube(scope):
+class cube(_TaskScopeKind):
     """``with tla.scope.cube():`` -- cube-core region.
 
     AIC scopes are not vector functions: only ``hivm.tcore_type<CUBE>`` is

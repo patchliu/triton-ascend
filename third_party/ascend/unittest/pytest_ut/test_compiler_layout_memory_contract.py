@@ -887,6 +887,22 @@ def test_finalize_program_launch_policy_pure_simt_ignores_blacklist(
     assert metadata["ptsm_cap_authorized"] is False
 
 
+@pytest.mark.parametrize("pure_simt", (False, True))
+def test_tla_launch_policy_keeps_full_grid(compiler_module, monkeypatch, pure_simt):
+    metadata = {
+        "program_grid_transforms": None,
+        "program_grid_mapping_applied": False,
+        "row_coalescing_applied": False,
+        "has_auto_blockify_blacklist_op": False,
+        "mix_mode": "aiv",
+    }
+    monkeypatch.setattr(compiler_module, "_is_auto_map_parallel_blocks_enabled", lambda: True)
+    compiler_module._finalize_program_launch_policy(
+        metadata, SimpleNamespace(is_pure_simt=pure_simt, enable_tla_mode=True))
+    assert metadata["auto_blockify_enabled"] is False
+    assert metadata["ptsm_cap_authorized"] is False
+
+
 @pytest.mark.parametrize(
     "function_name",
     (
