@@ -67,7 +67,7 @@ from triton.language.core import (
 )
 
 from .core import AddressSpace, buffer, buffer_type, vector, vector_type
-from .scope import scope
+from .scope import scope, pipeline
 from .alloc import alloc_buffer, alloc
 from .copy import copy
 from .dma import (
@@ -202,6 +202,7 @@ __all__ = [
 
     # core-mode scopes (scope.simd / scope.cube)
     "scope",
+    "pipeline",
 
     # math helpers / diagnostics
     "math",
