@@ -82,7 +82,7 @@ def make_context():
     buffer_ir.load_dialects(ctx)
     ascend_ir.load_dialects(ctx)
     # ``ascend_ir`` only registers hivm/ave/scope/annotation; the TritonAscend
-    # dialect (e.g. ``ascend.tla_pointer_view``) comes from this entry point.
+    # dialect comes from this entry point, matching the runtime backend.
     ascend.load_dialects(ctx)
     return ctx
 

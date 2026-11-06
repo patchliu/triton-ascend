@@ -32,6 +32,7 @@
 #include "mlir/Dialect/Linalg/IR/Linalg.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/Utils/ReshapeOpsUtils.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/OpDefinition.h"
 #include "mlir/Interfaces/FunctionInterfaces.h"
 #include "mlir/Transforms/DialectConversion.h"
@@ -793,12 +794,12 @@ struct DotScaledConverter : public OpConversionPattern<triton::DotScaledOp> {
                   ConversionPatternRewriter &rewriter) const override;
 };
 
-class TlaPointerViewConverter
-    : public OpConversionPattern<triton::ascend::TlaPointerViewOp> {
+class TlaBufferBridgeConverter
+    : public OpConversionPattern<UnrealizedConversionCastOp> {
 public:
   using OpConversionPattern::OpConversionPattern;
   LogicalResult
-  matchAndRewrite(triton::ascend::TlaPointerViewOp op, OpAdaptor adaptor,
+  matchAndRewrite(UnrealizedConversionCastOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override;
 };
 

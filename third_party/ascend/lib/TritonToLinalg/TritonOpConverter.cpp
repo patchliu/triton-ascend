@@ -3499,50 +3499,26 @@ IntToPtrConverter::matchAndRewrite(triton::IntToPtrOp op, OpAdaptor adaptor,
   return success();
 }
 
-LogicalResult
-TlaPointerViewConverter::matchAndRewrite(
-    triton::ascend::TlaPointerViewOp op, OpAdaptor adaptor,
+// The frontend's block-pointer-to-buffer bridge carries no address arithmetic.
+// Resolve it only after standard make_tensor_ptr lowering supplies a descriptor.
+LogicalResult TlaBufferBridgeConverter::matchAndRewrite(
+    UnrealizedConversionCastOp op, OpAdaptor adaptor,
     ConversionPatternRewriter &rewriter) const {
-  Value source = unwrapPointerDescriptorMaterialization(adaptor.getSrc());
+  if (!op->hasAttr("tla.gm_view"))
+    return failure();
+  if (adaptor.getOperands().size() != 1 || op->getNumResults() != 1)
+    return rewriter.notifyMatchFailure(op, "expected a one-to-one GM view bridge");
+  Value source = adaptor.getOperands().front();
   auto sourceType = dyn_cast<MemRefType>(source.getType());
-  auto resultType = cast<MemRefType>(op.getResult().getType());
-  if (!sourceType ||
-      sourceType.getElementType() != resultType.getElementType() ||
-      sourceType.getMemorySpace() != resultType.getMemorySpace())
+  auto resultType = dyn_cast<MemRefType>(op->getResult(0).getType());
+  if (!sourceType || !resultType ||
+      !memref::CastOp::areCastCompatible(sourceType, resultType))
     return rewriter.notifyMatchFailure(
-        op, "pointer descriptor must preserve the element type and GM space");
-
-  SmallVector<int64_t> sourceStrides;
-  int64_t sourceOffset;
-  if (failed(sourceType.getStridesAndOffset(sourceStrides, sourceOffset)))
-    return rewriter.notifyMatchFailure(op, "requires a strided pointer descriptor");
-
-  auto loc = op.getLoc();
-  Value offset;
-  if (auto view = source.getDefiningOp<memref::ReinterpretCastOp>()) {
-    // A reinterpret offset already includes the full displacement from the
-    // aligned base. Reuse it once, without accumulating earlier view offsets.
-    int64_t viewOffset = view.getStaticOffsets().front();
-    if (ShapedType::isDynamic(viewOffset))
-      offset = view.getOffsets().front();
-    else
-      offset = rewriter.create<arith::ConstantIndexOp>(loc, viewOffset);
-    source = view.getSource();
-  } else if (ShapedType::isDynamic(sourceOffset)) {
-    offset = rewriter.create<memref::ExtractStridedMetadataOp>(loc, source)
-                 .getOffset();
-  } else {
-    offset = rewriter.create<arith::ConstantIndexOp>(loc, sourceOffset);
-  }
-  offset = rewriter.createOrFold<arith::AddIOp>(loc, offset, adaptor.getLinear());
-  auto strides = resultType.getStridesAndOffset().first;
-  // Opaque scalar-pointer carriers keep their existing pointer_cast root.
-  // Argument-backed pointers remain a view chain that TLA scheduling can trace.
-  rewriter.replaceOpWithNewOp<memref::ReinterpretCastOp>(
-      op, resultType, source, ValueRange{offset}, ValueRange{}, ValueRange{},
-      rewriter.getDenseI64ArrayAttr({ShapedType::kDynamic}),
-      rewriter.getDenseI64ArrayAttr(resultType.getShape()),
-      rewriter.getDenseI64ArrayAttr(strides));
+        op, "block pointer did not lower to a compatible GM buffer descriptor");
+  if (sourceType == resultType)
+    rewriter.replaceOp(op, source);
+  else
+    rewriter.replaceOpWithNewOp<memref::CastOp>(op, resultType, source);
   return success();
 }
 
