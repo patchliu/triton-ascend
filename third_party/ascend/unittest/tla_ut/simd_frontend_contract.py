@@ -1415,6 +1415,11 @@ def test_every_python_builder_call_is_bound_and_whitelisted():
     shared_cpp = (_TLA_DIR.parents[1] / "ascend_ir.cc").read_text()
     bound = set(re.findall(r'\.def\(\s*"(create_[a-z0-9_]+)"', cpp + shared_cpp))
 
+    # Core methods are already available on the main Triton builder and do
+    # not need to be attached through ascend_methods.
+    core_cpp = (_TLA_DIR.parents[3] / "python" / "src" / "ir.cc").read_text()
+    core_bound = set(re.findall(r'\.def\(\s*"(create_[a-z0-9_]+)"', core_cpp))
+
     builder_py = (_TLA_DIR / "builder.py").read_text()
     tree = ast.parse(builder_py)
     whitelisted = set()
@@ -1427,8 +1432,10 @@ def test_every_python_builder_call_is_bound_and_whitelisted():
         used |= set(re.findall(r"builder\.(create_[a-z0-9_]+)\(", py.read_text()))
 
     assert used, "expected builder.create_* calls in the tla python frontend"
-    assert used <= bound, f"used but not bound in tla_builder.cc: {sorted(used - bound)}"
-    assert used <= whitelisted, f"used but missing from ascend_methods: {sorted(used - whitelisted)}"
+    assert used <= bound | core_bound, f"used but not bound: {sorted(used - bound - core_bound)}"
+    extension_used = used - core_bound
+    assert extension_used <= whitelisted, (
+        f"used but missing from ascend_methods: {sorted(extension_used - whitelisted)}")
 
 
 def test_new_bindings_and_ave_ops_are_present():
