@@ -20,26 +20,6 @@ using namespace mlir::triton;
 
 namespace mlir::triton::ascend {
 
-LogicalResult TlaPointerViewOp::verify() {
-  auto type = cast<MemRefType>(getResult().getType());
-  auto elementType = cast<PointerType>(getSrc().getType()).getPointeeType();
-  if (!elementType.isIntOrFloat() ||
-      elementType.getIntOrFloatBitWidth() % 8 != 0)
-    return emitOpError("requires a byte-addressable integer or float pointer");
-  if (type.getElementType() != elementType || type.getMemorySpace())
-    return emitOpError("requires the pointer element type and default GM memory space");
-  if (!type.hasStaticShape() || type.getRank() == 0 ||
-      llvm::any_of(type.getShape(), [](int64_t size) { return size <= 0; }))
-    return emitOpError("requires a nonempty static shape with positive dimensions");
-  SmallVector<int64_t> strides;
-  int64_t offset;
-  if (failed(type.getStridesAndOffset(strides, offset)) ||
-      !ShapedType::isDynamic(offset) ||
-      llvm::any_of(strides, [](int64_t stride) { return stride <= 0; }))
-    return emitOpError("requires static positive strides and a dynamic offset");
-  return success();
-}
-
 void GatherOutToUbOp::getEffects(
     SmallVectorImpl<SideEffects::EffectInstance<MemoryEffects::Effect>>
         &effects) {

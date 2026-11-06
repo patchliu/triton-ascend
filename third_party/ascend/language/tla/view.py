@@ -22,8 +22,9 @@
 ``tla.view`` aliases memory as a buffer for subsequent DMA/simd ops:
 
 - GM pointer entry: ``view(ptr, shape, strides, offsets, space="gm")`` preserves
-  the pointer descriptor through ``ascend.tla_pointer_view``. It lowers to a
-  ``memref.reinterpret_cast`` with the source offset plus ``sum(off_i*stride_i)``.
+  the pointer descriptor through ``tt.make_tensor_ptr``. Standard pointer
+  lowering produces a ``memref.reinterpret_cast`` with the source offset plus
+  ``sum(off_i*stride_i)``.
   ``strides`` are the final memref strides, defaulting to row-major.
 - Buffer tile: ``subview(buf, offsets, sizes, strides)`` or the compatible
   ``view(buf, sizes, strides, offsets)``. Lowers to a ``memref.subview``;
