@@ -1102,10 +1102,6 @@ static void addMemoryConversionLegalities(ConversionTarget &target,
       triton::ascend::GatherOutToUbOp, triton::ascend::ScatterUbToOutOp,
       triton::ascend::IndexSelectSimdOp, triton::ascend::IndexPutOp>();
 
-  // TLA bridges must disappear at the memory-conversion boundary.
-  target.addDynamicallyLegalOp<UnrealizedConversionCastOp>(
-      [](Operation *op) { return !op->hasAttr("tla.gm_view"); });
-
   target.addDynamicallyLegalOp<triton::FuncOp>([&](triton::FuncOp op) {
     return typeConverter.isSignatureLegal(op.getFunctionType());
   });
@@ -1728,7 +1724,6 @@ void TritonToLinalgPass::populateTritonToLinalgConversionPatterns(
   patterns.add<TTOpConverters::DotConverter>(patterns.getContext());
   patterns.add<TTOpConverters::DotScaledConverter>(patterns.getContext());
   patterns.add<TTOpConverters::PtrToIntConverter>(patterns.getContext());
-  patterns.add<TTOpConverters::TlaBufferBridgeConverter>(patterns.getContext());
   patterns.add<TTOpConverters::IntToPtrConverter>(typeConverter,
                                                   patterns.getContext());
 

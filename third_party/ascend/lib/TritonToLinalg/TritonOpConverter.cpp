@@ -3499,29 +3499,6 @@ IntToPtrConverter::matchAndRewrite(triton::IntToPtrOp op, OpAdaptor adaptor,
   return success();
 }
 
-// The frontend's block-pointer-to-buffer bridge carries no address arithmetic.
-// Resolve it only after standard make_tensor_ptr lowering supplies a descriptor.
-LogicalResult TlaBufferBridgeConverter::matchAndRewrite(
-    UnrealizedConversionCastOp op, OpAdaptor adaptor,
-    ConversionPatternRewriter &rewriter) const {
-  if (!op->hasAttr("tla.gm_view"))
-    return failure();
-  if (adaptor.getOperands().size() != 1 || op->getNumResults() != 1)
-    return rewriter.notifyMatchFailure(op, "expected a one-to-one GM view bridge");
-  Value source = adaptor.getOperands().front();
-  auto sourceType = dyn_cast<MemRefType>(source.getType());
-  auto resultType = dyn_cast<MemRefType>(op->getResult(0).getType());
-  if (!sourceType || !resultType ||
-      !memref::CastOp::areCastCompatible(sourceType, resultType))
-    return rewriter.notifyMatchFailure(
-        op, "block pointer did not lower to a compatible GM buffer descriptor");
-  if (sourceType == resultType)
-    rewriter.replaceOp(op, source);
-  else
-    rewriter.replaceOpWithNewOp<memref::CastOp>(op, resultType, source);
-  return success();
-}
-
 LogicalResult
 PtrToIntConverter::matchAndRewrite(triton::PtrToIntOp op, OpAdaptor adaptor,
                                    ConversionPatternRewriter &rewriter) const {
