@@ -11,7 +11,7 @@ PERF_COUNTERS = False
 OUTPUT = Path('fa-pipeline-results')
 
 
-@pytest.fixture(params=("v1", "v2", "v3"))
+@pytest.fixture(params=("v1", "v2", "v3", "v4"))
 def runtime(request):
     name = 'fa_pipeline_kernel.py' if request.param == 'v1' else f'fa_pipeline_kernel_{request.param}.py'
     return testing.runtime(request, Path(__file__).with_name(name), RUN_PERF)

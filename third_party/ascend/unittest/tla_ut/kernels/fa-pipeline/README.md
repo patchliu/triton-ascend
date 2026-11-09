@@ -200,3 +200,53 @@ TLA_TEST_STAGE=run pytest -q -s third_party/ascend/unittest/tla_ut/kernels/fa-pi
 测试入口已加入 v3，沿用全部输出及 max/sum、normal/uniform/peaked、重复调用、优化 FA
 和 AscendC 的对比。补充了前端和 NPU-IR 合同回归源码。按本轮要求未执行这些测试，
 未构建编译器、未上卡，也未测性能；同步正确性仍须通过生成 IR 与设备结果确认。
+
+## v4：四阶段 KV 计算流水（已验证）
+
+`fa_pipeline_kernel_v4.py` 保留 v3 的外层 query 循环与内层 `tla.pipeline(4)`，
+保持 BF16 B4/H8/S1024/D64 dense FA8、BM128/BN256、28 AIC/56 AIV。
+仅调整 task 调度和 V 的加载时机，计算公式、SIMD 布局、精度门限不变：
+
+| 操作 | v3 stage | v4 stage |
+|---|---:|---:|
+| K 加载 | 0 | 0 |
+| QK 与 score 写回 | 1 | 0 |
+| softmax 与 P 发布 | 1 | 1 |
+| V 加载 | 0 | 2，位于 PV task 内 |
+| PV 与 partial 写回 | 1 | 2 |
+| accumulator 更新 | 1 | 3 |
+
+稳态时可以重叠 QK(t)、softmax(t-1)、PV(t-2)、accumulate(t-3)。
+算子源码不包含物理槽号、flag、手工 multibuffer 标记或 fill/drain 展开。
+LowerTLAStages 的实际 IR 为 score/P/alpha/partial 分别生成 2/2/3/2 份存储；
+ready/free 同步和物理版本选择由编译器生成。m/l 仍在 stage 1 递推，acc 在 stage 3
+递推；alpha 是当前逻辑 KV 的临时量，跨 stage 自动版本化。
+
+2026-11-07 实测：wheel `676cbc44`、NPU-IR `b0b20b66`、blue2 Ascend950PR、
+CANN 9.1.0。v4 在 normal（两 seed）、uniform、peaked 共四组输入上各重复三次，
+O/max/sum 全部通过既有检查；O 的最大全局归一化误差 0.003153（门限 0.005）。
+在空闲物理卡 1 的同场对照中，每个实现采样 3 轮 × 40 次：
+
+| 实现 | 设备中位耗时 |
+|---|---:|
+| v3 | 105.605 us |
+| v4 | 55.760 us |
+| 优化 FA（v4 同轮） | 45.4395 us |
+
+v4 相对 v3 耗时下降约 47.2%，约 1.89 倍加速；还未达到优化 FA 的速度。
+源文件路径/哈希、每轮数据和设备占用检查均保留在实验归档。
+
+```bash
+TLA_TEST_STAGE=run python -m pytest -q -s \
+  third_party/ascend/unittest/tla_ut/kernels/fa-pipeline -k 'test_run and v4'
+# 将该目录 test_fa_pipeline.py 的 RUN_PERF 改为 True 后：
+TLA_TEST_STAGE=run python -m pytest -q -s \
+  third_party/ascend/unittest/tla_ut/kernels/fa-pipeline -k 'test_perf and v4'
+```
+
+额外单变量实验保持同一外部 FA8 和完整精度要求：V 提前一级约 55.64 us、
+accumulate 合并到 stage 2 约 56.60 us、BN128 约 57.89 us。
+这些实验未显示进一步稳定收益，均未替代主 v4。连续 query/KV 流已按要求搁置；
+首末块特化尚未通过编译，也不是本文件的实现。
+
+归档：yun/blue2 `~/workspace/npuir/temp/20261107-fa8-v4-01/`。
