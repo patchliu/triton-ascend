@@ -1,0 +1,44 @@
+bishengir-opt: /home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-source/bishengir/lib/Dialect/HIVM/Transforms/GraphSyncSolver/SyncSolverBase.cpp:2179: bool mlir::hivm::syncsolver::SyncSolverBase::checkSkipCVPreloadingPair(Occurrence *, Occurrence *): Assertion `scopeOp1 != scopeOp2 && *scopeOp1->preloadNum != *scopeOp2->preloadNum' failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: npuir-build/bin/bishengir-opt mla-temp/same-preload.mlir -hivm-adapt-tla-pipeline -hivm-verify-preload-pipeline -hivm-prepare-preload-buffers -hivm-mark-tightly-coupled-buffer "-hivm-cross-core-gss=solver-version=v2 loop-filter-attr=hivm.preload_pipeline"
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+0  bishengir-opt 0x000060b2830ab0c8
+1  bishengir-opt 0x000060b2830a8d0e
+2  bishengir-opt 0x000060b2830ab758
+3  libc.so.6     0x000078da4c445330
+4  libc.so.6     0x000078da4c49ec0c pthread_kill + 284
+5  libc.so.6     0x000078da4c44527e gsignal + 30
+6  libc.so.6     0x000078da4c4288ff abort + 223
+7  libc.so.6     0x000078da4c42881b
+8  libc.so.6     0x000078da4c43b517
+9  bishengir-opt 0x000060b27dab20a9
+10 bishengir-opt 0x000060b27dab21b1
+11 bishengir-opt 0x000060b27db35782
+12 bishengir-opt 0x000060b27db366f5
+13 bishengir-opt 0x000060b27db37f38
+14 bishengir-opt 0x000060b27db39645
+15 bishengir-opt 0x000060b27db394be
+16 bishengir-opt 0x000060b27db395be
+17 bishengir-opt 0x000060b27db395be
+18 bishengir-opt 0x000060b27db395be
+19 bishengir-opt 0x000060b27dabfc9c
+20 bishengir-opt 0x000060b27dac052a
+21 bishengir-opt 0x000060b27da91d44
+22 bishengir-opt 0x000060b282c012ef
+23 bishengir-opt 0x000060b282c01a80
+24 bishengir-opt 0x000060b282c06f2e
+25 bishengir-opt 0x000060b282c031cb
+26 bishengir-opt 0x000060b282c01439
+27 bishengir-opt 0x000060b282c01a80
+28 bishengir-opt 0x000060b282c040ff
+29 bishengir-opt 0x000060b282b92862
+30 bishengir-opt 0x000060b282b924db
+31 bishengir-opt 0x000060b282dc3985
+32 bishengir-opt 0x000060b282b8d87d
+33 bishengir-opt 0x000060b282b8db1c
+34 bishengir-opt 0x000060b282b8dd32
+35 bishengir-opt 0x000060b27c6388ff
+36 libc.so.6     0x000078da4c42a1ca
+37 libc.so.6     0x000078da4c42a28b __libc_start_main + 139
+38 bishengir-opt 0x000060b27c638165

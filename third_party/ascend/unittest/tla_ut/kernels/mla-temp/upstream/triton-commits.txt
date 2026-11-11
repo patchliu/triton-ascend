@@ -1,0 +1,5 @@
+008dff39bdcc908d6706946189b0c53c5257e4d4 [ascend] Expose explicit metaop and sync options
+f2cf54468b1b0ec3930be24098d4e87780073ae5 [ascend][TLA] Add dynamic ND2NZ row windows
+9bf447e525fbb3d544ae4e686050077ffe313922 [ascend][TLA] Support BF16 L0 matrix operands
+5cd8a5807e3bdf0ba4f0a7dbbde5494cfacbc1f4 [ascend][TLA] Refine execution scheduling
+b9a4939bacfd568bdb28f02813950b486012b8df [ascend](feat) Add TLA MMAD L0 API

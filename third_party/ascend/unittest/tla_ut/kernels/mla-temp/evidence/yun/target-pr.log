@@ -1,0 +1,10 @@
+/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/python-upstream/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.atan2")
+/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/python-upstream/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.isfinited")
+/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/python-upstream/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.finitef")
+ELF_PASS Ascend950PR_9579 mla-tla full grid 28 splits 5
+ELF_PASS Ascend950PR_9579 mla-tla ragged grid 28 splits 6
+ELF_PASS Ascend950PR_9579 mla-pipeline full grid 28 splits 7
+ELF_PASS Ascend950PR_9579 mla-pipeline ragged grid 20 splits 5

@@ -1,0 +1,1279 @@
+{
+  "phase": "complete",
+  "source_sha256": {
+    "previous_host": "6256345f96d83322f74a244c9dc2c9fc40890a33703d932a4861851e6f9f3e82",
+    "previous_l0": "1946220e15ca5be6a3916fd9383616161b4f4fcd3d398da8a9fd9c0a9db6fa4d",
+    "final_l0": "b8cc86129b25501e6f2d9a6229626407cf8aa5806ce8534a7d4c5077de91c7ba",
+    "final_pipeline": "a5f8d41eea410f5cf6b0303093c96c06dcb879d626edce46c5986e79c1cc0132"
+  },
+  "precision": {
+    "previous_l0": {
+      "ragged": {
+        "output": {
+          "normalized_max_error": 0.003219868056476116,
+          "relative_rms": 0.0014801215147599578
+        },
+        "lse": {
+          "normalized_max_error": 6.340195568554918e-08,
+          "relative_rms": 2.9413653734877698e-08
+        }
+      },
+      "full": {
+        "output": {
+          "normalized_max_error": 0.0033983143512159586,
+          "relative_rms": 0.0016662557609379292
+        },
+        "lse": {
+          "normalized_max_error": 1.537783020921779e-07,
+          "relative_rms": 4.254160401728768e-08
+        }
+      }
+    },
+    "final_l0": {
+      "ragged": {
+        "output": {
+          "normalized_max_error": 0.003219868056476116,
+          "relative_rms": 0.0014801215147599578
+        },
+        "lse": {
+          "normalized_max_error": 6.340195568554918e-08,
+          "relative_rms": 2.9413653734877698e-08
+        }
+      },
+      "full": {
+        "output": {
+          "normalized_max_error": 0.0033983143512159586,
+          "relative_rms": 0.0016662557609379292
+        },
+        "lse": {
+          "normalized_max_error": 1.537783020921779e-07,
+          "relative_rms": 4.254160401728768e-08
+        }
+      }
+    },
+    "previous_pipeline": {
+      "ragged": {
+        "output": {
+          "normalized_max_error": 0.003219868056476116,
+          "relative_rms": 0.0014817964984104037
+        },
+        "lse": {
+          "normalized_max_error": 6.340195568554918e-08,
+          "relative_rms": 2.9413653734877698e-08
+        }
+      },
+      "full": {
+        "output": {
+          "normalized_max_error": 0.0033983143512159586,
+          "relative_rms": 0.0016662089619785547
+        },
+        "lse": {
+          "normalized_max_error": 1.537783020921779e-07,
+          "relative_rms": 3.726317743257823e-08
+        }
+      }
+    },
+    "final_pipeline": {
+      "ragged": {
+        "output": {
+          "normalized_max_error": 0.003219868056476116,
+          "relative_rms": 0.0014817964984104037
+        },
+        "lse": {
+          "normalized_max_error": 6.340195568554918e-08,
+          "relative_rms": 2.9413653734877698e-08
+        }
+      },
+      "full": {
+        "output": {
+          "normalized_max_error": 0.0033983143512159586,
+          "relative_rms": 0.0016662089619785547
+        },
+        "lse": {
+          "normalized_max_error": 1.537783020921779e-07,
+          "relative_rms": 3.726317743257823e-08
+        }
+      }
+    }
+  },
+  "formal": {
+    "previous_l0": [
+      {
+        "samples_us": [
+          805.135,
+          814.84,
+          796.927,
+          796.349,
+          801.162,
+          803.932,
+          796.159,
+          798.21,
+          796.173,
+          794.599,
+          801.65,
+          799.871,
+          797.285,
+          795.284,
+          795.056,
+          793.603,
+          795.486,
+          792.717,
+          795.405,
+          797.143,
+          795.164,
+          799.311,
+          797.077,
+          796.652,
+          805.832,
+          801.317,
+          791.362,
+          792.938,
+          791.965,
+          790.457,
+          792.237,
+          790.713,
+          789.567,
+          789.984,
+          792.753,
+          796.425,
+          799.882,
+          809.956,
+          801.606,
+          799.245
+        ],
+        "wall_samples_us": [
+          2051.769,
+          856.906,
+          841.092,
+          839.359,
+          843.846,
+          841.152,
+          832.509,
+          836.655,
+          835.153,
+          831.658
+        ],
+        "median_us": 796.387,
+        "wall_median_us": 840.2255,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4766\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "mla_split_explicit"
+        ]
+      },
+      {
+        "samples_us": [
+          799.012,
+          797.231,
+          794.864,
+          794.931,
+          795.934,
+          801.613,
+          803.915,
+          815.192,
+          801.605,
+          797.77,
+          793.469,
+          793.548,
+          794.342,
+          796.104,
+          792.475,
+          793.116,
+          797.783,
+          794.668,
+          798.954,
+          795.433,
+          792.998,
+          793.568,
+          797.017,
+          796.018,
+          797.735,
+          793.817,
+          794.498,
+          794.795,
+          795.212,
+          798.29,
+          800.83,
+          797.215,
+          796.408,
+          796.661,
+          803.142,
+          796.254,
+          798.115,
+          798.729,
+          801.694,
+          795.801
+        ],
+        "wall_samples_us": [
+          2096.015,
+          874.242,
+          844.097,
+          849.645,
+          877.176,
+          876.986,
+          835.113,
+          838.038,
+          838.939,
+          849.565
+        ],
+        "median_us": 796.331,
+        "wall_median_us": 849.605,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "mla_split_explicit"
+        ]
+      },
+      {
+        "samples_us": [
+          798.021,
+          794.828,
+          795.479,
+          799.356,
+          795.349,
+          797.767,
+          797.8,
+          797.274,
+          794.62,
+          793.947,
+          796.412,
+          793.841,
+          791.652,
+          793.711,
+          797.696,
+          796.89,
+          791.95,
+          793.932,
+          793.235,
+          794.876,
+          795.282,
+          798.002,
+          796.978,
+          794.412,
+          796.7,
+          793.956,
+          794.181,
+          794.88,
+          796.878,
+          798.046,
+          796.316,
+          793.755,
+          794.736,
+          799.885,
+          796.228,
+          797.577,
+          796.822,
+          797.763,
+          799.735,
+          799.627
+        ],
+        "wall_samples_us": [
+          2270.457,
+          896.335,
+          858.488,
+          866.841,
+          866.34,
+          843.796,
+          842.805,
+          840.441,
+          839.43,
+          836.996
+        ],
+        "median_us": 796.2719999999999,
+        "wall_median_us": 851.142,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "mla_split_explicit"
+        ]
+      }
+    ],
+    "final_l0": [
+      {
+        "samples_us": [
+          795.027,
+          793.584,
+          792.433,
+          788.973,
+          793.441,
+          790.632,
+          795.144,
+          796.429,
+          792.682,
+          787.277,
+          792.202,
+          793.797,
+          789.879,
+          792.645,
+          790.493,
+          794.527,
+          790.195,
+          791.98,
+          791.123,
+          789.133,
+          791.947,
+          794.055,
+          791.512,
+          794.002,
+          793.894,
+          794.798,
+          792.412,
+          792.544,
+          793.827,
+          795.865,
+          796.488,
+          790.385,
+          789.445,
+          792.409,
+          793.186,
+          794.731,
+          796.109,
+          794.221,
+          797.535,
+          795.515
+        ],
+        "wall_samples_us": [
+          2105.079,
+          899.6,
+          859.78,
+          854.121,
+          851.527,
+          854.272,
+          842.855,
+          840.881,
+          837.827,
+          850.596
+        ],
+        "median_us": 792.934,
+        "wall_median_us": 852.8240000000001,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      },
+      {
+        "samples_us": [
+          805.79,
+          799.134,
+          795.366,
+          792.604,
+          796.659,
+          797.305,
+          793.031,
+          795.254,
+          797.521,
+          794.147,
+          798.18,
+          792.826,
+          799.658,
+          794.86,
+          796.787,
+          794.6,
+          796.632,
+          799.164,
+          793.714,
+          797.363,
+          794.961,
+          792.997,
+          794.136,
+          794.623,
+          801.368,
+          794.587,
+          797.449,
+          796.912,
+          798.361,
+          790.565,
+          796.466,
+          796.26,
+          793.194,
+          796.507,
+          795.349,
+          794.292,
+          797.287,
+          796.338,
+          800.603,
+          798.577
+        ],
+        "wall_samples_us": [
+          2084.518,
+          880.071,
+          843.045,
+          845.278,
+          843.275,
+          849.585,
+          839.95,
+          839.71,
+          836.466,
+          832.399
+        ],
+        "median_us": 796.402,
+        "wall_median_us": 843.16,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      },
+      {
+        "samples_us": [
+          798.835,
+          794.646,
+          792.126,
+          798.86,
+          796.07,
+          795.672,
+          793.565,
+          797.319,
+          793.83,
+          794.944,
+          798.762,
+          792.757,
+          793.26,
+          798.167,
+          797.569,
+          795.634,
+          792.61,
+          797.97,
+          796.559,
+          794.865,
+          795.939,
+          800.54,
+          792.863,
+          793.253,
+          794.915,
+          792.644,
+          795.929,
+          798.531,
+          795.534,
+          792.326,
+          799.155,
+          800.684,
+          801.774,
+          800.236,
+          805.683,
+          798.679,
+          797.904,
+          799.204,
+          802.138,
+          803.486
+        ],
+        "wall_samples_us": [
+          2055.394,
+          866.911,
+          841.292,
+          839.479,
+          847.401,
+          849.384,
+          833.641,
+          841.493,
+          837.327,
+          833.45
+        ],
+        "median_us": 796.3145,
+        "wall_median_us": 841.3925,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      }
+    ],
+    "previous_pipeline": [
+      {
+        "samples_us": [
+          1139.2269999999999,
+          1139.353,
+          1154.881,
+          1137.232,
+          1134.434,
+          1148.1560000000002,
+          1134.634,
+          1130.735,
+          1151.7610000000002,
+          1139.2,
+          1153.637,
+          1146.404,
+          1156.636,
+          1145.078,
+          1146.4589999999998,
+          1155.979,
+          1148.654,
+          1151.118,
+          1140.815,
+          1137.655,
+          1136.0059999999999,
+          1148.835,
+          1130.059,
+          1142.92,
+          1139.6080000000002,
+          1151.8259999999998,
+          1133.669,
+          1141.737,
+          1143.6470000000002,
+          1147.0919999999999,
+          1140.812,
+          1145.5659999999998,
+          1141.173,
+          1138.003,
+          1145.111,
+          1146.419,
+          1139.2160000000001,
+          1147.383,
+          1152.7169999999999,
+          1146.652
+        ],
+        "wall_samples_us": [
+          2369.415,
+          1206.1,
+          1196.596,
+          1218.509,
+          1193.05,
+          1190.426,
+          1175.543,
+          1192.209,
+          1175.343,
+          1182.224
+        ],
+        "median_us": 1144.3625000000002,
+        "wall_median_us": 1192.6295,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "mla_split",
+          "merge_splits"
+        ]
+      },
+      {
+        "samples_us": [
+          1145.8,
+          1134.4270000000001,
+          1139.022,
+          1141.885,
+          1143.546,
+          1139.26,
+          1143.889,
+          1133.42,
+          1135.63,
+          1133.385,
+          1141.7730000000001,
+          1139.543,
+          1151.1889999999999,
+          1139.65,
+          1143.9270000000001,
+          1153.0739999999998,
+          1153.6699999999998,
+          1153.366,
+          1146.976,
+          1138.347,
+          1132.4969999999998,
+          1150.1779999999999,
+          1144.1770000000001,
+          1132.41,
+          1145.451,
+          1143.126,
+          1134.3329999999999,
+          1142.42,
+          1146.556,
+          1156.6399999999999,
+          1144.3919999999998,
+          1132.323,
+          1140.745,
+          1149.432,
+          1137.586,
+          1135.7340000000002,
+          1150.6419999999998,
+          1140.683,
+          1140.751,
+          1154.859
+        ],
+        "wall_samples_us": [
+          2475.594,
+          1268.023,
+          1215.414,
+          1191.107,
+          1215.975,
+          1201.753,
+          1190.847,
+          1187.021,
+          1206.871,
+          1197.106
+        ],
+        "median_us": 1142.1525000000001,
+        "wall_median_us": 1204.312,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "mla_split",
+          "merge_splits"
+        ]
+      },
+      {
+        "samples_us": [
+          1129.078,
+          1139.3500000000001,
+          1144.394,
+          1146.576,
+          1147.6390000000001,
+          1145.1609999999998,
+          1148.7179999999998,
+          1147.5169999999998,
+          1126.567,
+          1151.687,
+          1145.837,
+          1154.276,
+          1154.3609999999999,
+          1155.708,
+          1140.6209999999999,
+          1138.911,
+          1152.588,
+          1140.271,
+          1128.118,
+          1138.907,
+          1149.918,
+          1142.174,
+          1143.432,
+          1148.424,
+          1142.338,
+          1150.867,
+          1135.2259999999999,
+          1136.01,
+          1139.86,
+          1161.525,
+          1138.019,
+          1130.366,
+          1144.945,
+          1140.5400000000002,
+          1153.107,
+          1143.651,
+          1133.308,
+          1135.869,
+          1145.4470000000001,
+          1141.8580000000002
+        ],
+        "wall_samples_us": [
+          2704.468,
+          1241.743,
+          1217.426,
+          1237.768,
+          1217.597,
+          1199.27,
+          1205.819,
+          1201.092,
+          1197.607,
+          1207.802
+        ],
+        "median_us": 1143.5415,
+        "wall_median_us": 1212.614,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "mla_split",
+          "merge_splits"
+        ]
+      }
+    ],
+    "final_pipeline": [
+      {
+        "samples_us": [
+          1137.306,
+          1134.2710000000002,
+          1156.666,
+          1148.54,
+          1151.857,
+          1137.268,
+          1133.402,
+          1138.017,
+          1151.374,
+          1163.291,
+          1146.7549999999999,
+          1157.278,
+          1141.246,
+          1145.999,
+          1136.185,
+          1133.531,
+          1148.737,
+          1137.8339999999998,
+          1159.9789999999998,
+          1150.094,
+          1136.866,
+          1131.4089999999999,
+          1148.076,
+          1146.902,
+          1137.288,
+          1146.094,
+          1147.6490000000001,
+          1139.3509999999999,
+          1134.906,
+          1132.118,
+          1141.817,
+          1134.1760000000002,
+          1144.391,
+          1133.975,
+          1138.502,
+          1136.493,
+          1147.1200000000001,
+          1142.13,
+          1138.74,
+          1143.858
+        ],
+        "wall_samples_us": [
+          2373.962,
+          1206.78,
+          1193.29,
+          1179.28,
+          1191.588,
+          1191.728,
+          1180.491,
+          1197.948,
+          1184.137,
+          1176.966
+        ],
+        "median_us": 1141.5315,
+        "wall_median_us": 1191.658,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "attention_splits",
+          "merge_splits"
+        ]
+      },
+      {
+        "samples_us": [
+          1135.572,
+          1154.462,
+          1138.446,
+          1161.8490000000002,
+          1142.475,
+          1144.645,
+          1177.721,
+          1138.028,
+          1142.8539999999998,
+          1151.135,
+          1137.721,
+          1147.173,
+          1145.726,
+          1143.202,
+          1140.8419999999999,
+          1161.556,
+          1157.748,
+          1170.493,
+          1142.2559999999999,
+          1174.9119999999998,
+          1148.7839999999999,
+          1175.337,
+          1153.219,
+          1168.163,
+          1172.553,
+          1146.895,
+          1144.831,
+          1155.3629999999998,
+          1144.5339999999999,
+          1159.8400000000001,
+          1154.269,
+          1142.684,
+          1176.937,
+          1143.811,
+          1141.558,
+          1147.951,
+          1142.468,
+          1149.586,
+          1168.871,
+          1141.29
+        ],
+        "wall_samples_us": [
+          2409.345,
+          1248.243,
+          1203.145,
+          1197.436,
+          1190.045,
+          1184.327,
+          1185.249,
+          1204.377,
+          1189.234,
+          1187.692
+        ],
+        "median_us": 1147.562,
+        "wall_median_us": 1193.7404999999999,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "attention_splits",
+          "merge_splits"
+        ]
+      },
+      {
+        "samples_us": [
+          1145.634,
+          1161.6129999999998,
+          1131.41,
+          1142.8870000000002,
+          1147.047,
+          1153.2359999999999,
+          1145.979,
+          1133.4689999999998,
+          1139.069,
+          1147.997,
+          1157.143,
+          1135.119,
+          1137.7669999999998,
+          1146.2720000000002,
+          1129.9879999999998,
+          1142.666,
+          1136.526,
+          1158.4479999999999,
+          1128.946,
+          1146.952,
+          1145.137,
+          1136.848,
+          1145.053,
+          1141.131,
+          1130.0539999999999,
+          1134.4289999999999,
+          1139.907,
+          1159.329,
+          1137.78,
+          1150.9979999999998,
+          1161.067,
+          1154.125,
+          1135.283,
+          1145.384,
+          1144.3700000000001,
+          1134.033,
+          1152.405,
+          1136.473,
+          1149.516,
+          1160.51
+        ],
+        "wall_samples_us": [
+          2366.161,
+          1197.016,
+          1192.389,
+          1194.933,
+          1191.468,
+          1180.441,
+          1202.384,
+          1183.245,
+          1187.612,
+          1188.503
+        ],
+        "median_us": 1144.7115000000001,
+        "wall_median_us": 1191.9285,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "226269"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:226269  Process name:python            Process memory(MB):4772\n\n"
+          }
+        ],
+        "tasks_per_call": 2,
+        "task_names": [
+          "attention_splits",
+          "merge_splits"
+        ]
+      }
+    ]
+  },
+  "options": {
+    "previous_l0": {
+      "cube_grid": 28,
+      "task_stages": null,
+      "schedule": "explicit",
+      "split_pages": 161,
+      "splits": 5,
+      "head_tile": 96,
+      "q_group": 1,
+      "kv_page": 128,
+      "scale": 0.04,
+      "skip_full_mask": true,
+      "merge_columns": 512,
+      "fuse_merge": true,
+      "kv_major": true,
+      "wide_qk": false,
+      "packed": true,
+      "return_lse": true,
+      "kv_l2": 4,
+      "split_pv": false,
+      "l0_mode": "native112_merge_dynflags_stream_k",
+      "kv_tile": 112
+    },
+    "final_l0": {
+      "cube_grid": 28,
+      "vector_cores": 56,
+      "head_tile": 96,
+      "split_pages": 161,
+      "splits": 5,
+      "kv_tile": 112,
+      "fuse_merge": true,
+      "return_lse": true,
+      "scale": 0.04,
+      "kv_l2": 4
+    },
+    "previous_pipeline": {
+      "cube_grid": 28,
+      "task_stages": [
+        0,
+        0,
+        1
+      ],
+      "schedule": "late_pv",
+      "split_pages": 160,
+      "splits": 7,
+      "head_tile": 96,
+      "q_group": 1,
+      "kv_page": 128,
+      "scale": 0.04,
+      "skip_full_mask": true,
+      "merge_columns": 512,
+      "fuse_merge": false,
+      "kv_major": true,
+      "wide_qk": false,
+      "packed": true,
+      "return_lse": true,
+      "kv_l2": 4,
+      "split_pv": false,
+      "l0_mode": null,
+      "kv_tile": 128
+    },
+    "final_pipeline": {
+      "cube_grid": 28,
+      "vector_cores": 56,
+      "head_tile": 96,
+      "split_pages": 160,
+      "splits": 7,
+      "kv_tile": 128,
+      "fuse_merge": false,
+      "return_lse": true,
+      "scale": 0.04,
+      "kv_l2": 4
+    }
+  },
+  "medians": {
+    "previous_l0": {
+      "device_us": 796.3325,
+      "wall_us": 843.821
+    },
+    "final_l0": {
+      "device_us": 794.9525,
+      "wall_us": 844.2764999999999
+    },
+    "previous_pipeline": {
+      "device_us": 1143.279,
+      "wall_us": 1203.786
+    },
+    "final_pipeline": {
+      "device_us": 1144.7379999999998,
+      "wall_us": 1191.658
+    }
+  },
+  "relative_to_previous": {
+    "l0": 1.0017359527770526,
+    "pipeline": 0.9987254725535452
+  }
+}

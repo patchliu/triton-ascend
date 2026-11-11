@@ -1,0 +1,14 @@
+{
+  "BATCH": 8,
+  "QUERY_LENGTH": 4,
+  "QUERY_HEADS": 24,
+  "MAX_PAGES": 1120,
+  "SPLIT_PAGES": 280,
+  "SPLITS": 5,
+  "CUBE_CORES": 32,
+  "SCALE": 0.04,
+  "Q_TILE_ROWS": 96,
+  "KV_L2": 4,
+  "FUSE_MERGE": true,
+  "RETURN_LSE": true
+}

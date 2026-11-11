@@ -1,0 +1,46 @@
+{
+  "specification": {
+    "batch": 8,
+    "q_heads": 24,
+    "kv_heads": 1,
+    "q_len": 4,
+    "kv_len": 143360,
+    "qk_dim": 576,
+    "v_dim": 512,
+    "page": 128,
+    "dtype": "bf16",
+    "lse": "fp32",
+    "scale": 0.04,
+    "causal": "bottom-right"
+  },
+  "device": "Ascend950PR_9579",
+  "timing": {
+    "rounds": 6,
+    "samples_per_round": 40,
+    "device": "sum of all device tasks",
+    "wall": "complete Python call"
+  },
+  "final": {
+    "device_us": 818.277,
+    "wall_us": 867.6375
+  },
+  "previous": {
+    "device_us": 818.3115,
+    "wall_us": 864.307
+  },
+  "ascendc": {
+    "device_us": 824.594,
+    "wall_us": 877.306
+  },
+  "cannbot_dsl_h24": {
+    "device_us": 861.2764999999999,
+    "wall_us": 1138.9695000000002
+  },
+  "pct_of_ascendc": 100.77198796984395,
+  "pct_of_dsl": 105.25488312637405,
+  "pct_of_previous": 100.00421617618483,
+  "kernel_sha256": "b8cc86129b25501e6f2d9a6229626407cf8aa5806ce8534a7d4c5077de91c7ba",
+  "raw_results": "../mla-temp/evidence/blue2/before-after-final/results.json",
+  "performance_toolchain": "previously validated BF16 L0/O2 package",
+  "new_toolchain_validation": "offline compile on Ascend950PR_9579 and Ascend950DT_9581"
+}

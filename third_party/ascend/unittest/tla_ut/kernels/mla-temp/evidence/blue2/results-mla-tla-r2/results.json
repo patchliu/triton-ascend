@@ -1,0 +1,1458 @@
+{
+  "phase": "complete",
+  "specification": {
+    "bs": 8,
+    "num_head": 24,
+    "kv_head": 1,
+    "head_dim_qk": 576,
+    "head_dim_v": 512,
+    "q_len": 4,
+    "kv_len": 143360,
+    "page": 128,
+    "scale": 0.04,
+    "dtype": "bf16",
+    "output_dtype": "bf16",
+    "lse_dtype": "fp32",
+    "causal": "bottom-right"
+  },
+  "entry_snapshot": {
+    "returncode": 0,
+    "pids": [
+      "40238"
+    ],
+    "physical_device": "2",
+    "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):284\n\n"
+  },
+  "source_sha256": "300ea381cf10ab1d3990283cf4228f98c6f230fff4414f3d396b088ea9d9c412",
+  "compiler": "/home/l00898962/workspace/npuir/temp/20261111-flashmla-l0.iggOBZ/python-bf16-dynflags-o2/triton/backends/ascend/bishengir/bin/bishengir-compile",
+  "compiler_sha256": "7e2642eb5f24252d7d5720382b775a745df29237c504260e9f63a91aa7e42053",
+  "runtime": {
+    "torch": "2.7.1+cpu",
+    "torch_npu": "2.7.1.post7.dev20260707",
+    "triton": "3.6.0",
+    "triton_module": "/home/l00898962/workspace/npuir/temp/20261111-flashmla-l0.iggOBZ/python-bf16-dynflags-o2/triton/__init__.py",
+    "cann": "/usr/local/Ascend/cann-9.1.0",
+    "dsl_bisheng": "/home/l00898962/workspace/npuir/temp/20261110-mla-cannbot-bench.uvCRab/bisheng-cann92"
+  },
+  "metaop_o2": true,
+  "precision": {
+    "tla": {
+      "full/normal/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662557609379292
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.254160401728768e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662557609379292
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.254160401728768e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662557609379292
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.254160401728768e-08
+          }
+        }
+      ],
+      "full/normal/1104": [
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.001666297554038465
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.085990923385907e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.001666297554038465
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.085990923385907e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.001666297554038465
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.085990923385907e-08
+          }
+        }
+      ],
+      "full/uniform/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.001616142108105123
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.001616142108105123
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.001616142108105123
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        }
+      ],
+      "full/peaked/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016647673910483718
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2463816290164687e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016647673910483718
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2463816290164687e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016647673910483718
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2463816290164687e-07
+          }
+        }
+      ],
+      "ragged/normal/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.003219868056476116,
+            "relative_rms": 0.0014801215147599578
+          },
+          "lse": {
+            "normalized_max_error": 6.340195568554918e-08,
+            "relative_rms": 2.9413653734877698e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003219868056476116,
+            "relative_rms": 0.0014801215147599578
+          },
+          "lse": {
+            "normalized_max_error": 6.340195568554918e-08,
+            "relative_rms": 2.9413653734877698e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003219868056476116,
+            "relative_rms": 0.0014801215147599578
+          },
+          "lse": {
+            "normalized_max_error": 6.340195568554918e-08,
+            "relative_rms": 2.9413653734877698e-08
+          }
+        }
+      ],
+      "ragged/normal/1104": [
+        {
+          "output": {
+            "normalized_max_error": 0.003174872137606144,
+            "relative_rms": 0.0014363593654707074
+          },
+          "lse": {
+            "normalized_max_error": 6.329118207304418e-08,
+            "relative_rms": 3.1768969677159475e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003174872137606144,
+            "relative_rms": 0.0014363593654707074
+          },
+          "lse": {
+            "normalized_max_error": 6.329118207304418e-08,
+            "relative_rms": 3.1768969677159475e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003174872137606144,
+            "relative_rms": 0.0014363593654707074
+          },
+          "lse": {
+            "normalized_max_error": 6.329118207304418e-08,
+            "relative_rms": 3.1768969677159475e-08
+          }
+        }
+      ],
+      "ragged/uniform/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0013157895300537348,
+            "relative_rms": 0.0012481913436204195
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0013157895300537348,
+            "relative_rms": 0.0012481913436204195
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0013157895300537348,
+            "relative_rms": 0.0012481913436204195
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        }
+      ],
+      "ragged/peaked/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.002746917074546218,
+            "relative_rms": 0.0015196881722658873
+          },
+          "lse": {
+            "normalized_max_error": 3.454415491432883e-07,
+            "relative_rms": 1.358798442652187e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.002746917074546218,
+            "relative_rms": 0.0015196881722658873
+          },
+          "lse": {
+            "normalized_max_error": 3.454415491432883e-07,
+            "relative_rms": 1.358798442652187e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.002746917074546218,
+            "relative_rms": 0.0015196881722658873
+          },
+          "lse": {
+            "normalized_max_error": 3.454415491432883e-07,
+            "relative_rms": 1.358798442652187e-07
+          }
+        }
+      ]
+    },
+    "ascendc": {
+      "full/normal/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.001666284166276455
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.1708283049501915e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.001666284166276455
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.1708283049501915e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.001666284166276455
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.1708283049501915e-08
+          }
+        }
+      ],
+      "full/normal/1104": [
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662547132000327
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0668528100695767e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662547132000327
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0668528100695767e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662547132000327
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0668528100695767e-08
+          }
+        }
+      ],
+      "full/uniform/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        }
+      ],
+      "full/peaked/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651155892759562
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651155892759562
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651155892759562
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        }
+      ]
+    },
+    "cannbot": {
+      "full/normal/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662810230627656
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.198789227416455e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662810230627656
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.198789227416455e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0033983143512159586,
+            "relative_rms": 0.0016662810230627656
+          },
+          "lse": {
+            "normalized_max_error": 1.537783020921779e-07,
+            "relative_rms": 4.198789227416455e-08
+          }
+        }
+      ],
+      "full/normal/1104": [
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662696143612266
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0955264068998076e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662696143612266
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0955264068998076e-08
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003478275379166007,
+            "relative_rms": 0.0016662696143612266
+          },
+          "lse": {
+            "normalized_max_error": 1.535859013301888e-07,
+            "relative_rms": 4.0955264068998076e-08
+          }
+        }
+      ],
+      "full/uniform/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.003056576941162348,
+            "relative_rms": 0.0016161422245204449
+          },
+          "lse": {
+            "normalized_max_error": 0.0,
+            "relative_rms": 0.0
+          }
+        }
+      ],
+      "full/peaked/1103": [
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651160549372435
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651160549372435
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        },
+        {
+          "output": {
+            "normalized_max_error": 0.0023997952230274677,
+            "relative_rms": 0.0016651160549372435
+          },
+          "lse": {
+            "normalized_max_error": 5.339666131476406e-07,
+            "relative_rms": 1.2506808388934587e-07
+          }
+        }
+      ]
+    }
+  },
+  "formal": {
+    "tla": [
+      {
+        "samples_us": [
+          829.427,
+          828.881,
+          825.531,
+          824.642,
+          844.963,
+          830.729,
+          816.512,
+          820.245,
+          825.211,
+          823.885,
+          832.174,
+          823.854,
+          823.162,
+          828.806,
+          827.733,
+          829.841,
+          825.456,
+          823.105,
+          825.877,
+          827.734,
+          818.762,
+          826.677,
+          819.37,
+          820.8,
+          827.29,
+          822.147,
+          825.123,
+          822.106,
+          826.948,
+          821.47,
+          822.499,
+          828.743,
+          819.356,
+          822.731,
+          823.193,
+          826.184,
+          822.725,
+          827.173,
+          829.305,
+          835.647
+        ],
+        "wall_samples_us": [
+          2049.796,
+          891.849,
+          880.131,
+          875.173,
+          867.322,
+          890.416,
+          874.703,
+          866.149,
+          870.756,
+          866.43
+        ],
+        "median_us": 825.3335,
+        "wall_median_us": 874.938,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5944\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      },
+      {
+        "samples_us": [
+          829.168,
+          818.777,
+          828.051,
+          830.286,
+          817.656,
+          826.127,
+          829.418,
+          829.082,
+          829.88,
+          825.158,
+          817.141,
+          824.075,
+          830.809,
+          829.255,
+          827.831,
+          828.734,
+          826.44,
+          819.205,
+          826.282,
+          823.844,
+          824.375,
+          824.462,
+          825.953,
+          825.122,
+          824.123,
+          826.168,
+          831.224,
+          827.117,
+          830.086,
+          826.118,
+          821.638,
+          818.203,
+          825.326,
+          818.257,
+          822.146,
+          829.76,
+          824.195,
+          827.952,
+          823.377,
+          826.163
+        ],
+        "wall_samples_us": [
+          2057.678,
+          891.097,
+          878.969,
+          875.083,
+          886.78,
+          886.24,
+          865.368,
+          876.776,
+          872.9,
+          870.486
+        ],
+        "median_us": 826.1225,
+        "wall_median_us": 877.8725,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      },
+      {
+        "samples_us": [
+          828.945,
+          827.329,
+          822.611,
+          825.157,
+          820.813,
+          822.88,
+          821.809,
+          824.802,
+          827.468,
+          826.296,
+          824.974,
+          832.427,
+          813.686,
+          830.729,
+          828.514,
+          829.705,
+          828.519,
+          831.214,
+          828.413,
+          828.73,
+          824.901,
+          824.023,
+          824.78,
+          820.712,
+          830.086,
+          825.094,
+          828.088,
+          829.697,
+          826.392,
+          826.625,
+          810.047,
+          827.311,
+          829.632,
+          818.539,
+          814.347,
+          826.158,
+          825.843,
+          818.093,
+          825.109,
+          824.231
+        ],
+        "wall_samples_us": [
+          2054.643,
+          893.371,
+          861.864,
+          869.355,
+          879.98,
+          872.929,
+          860.491,
+          877.116,
+          866.78,
+          872.409
+        ],
+        "median_us": 826.0005,
+        "wall_median_us": 872.669,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "attention"
+        ]
+      }
+    ],
+    "ascendc": [
+      {
+        "samples_us": [
+          841.715,
+          850.929,
+          836.918,
+          836.598,
+          832.63,
+          837.516,
+          842.679,
+          830.109,
+          839.342,
+          836.785,
+          836.424,
+          831.415,
+          836.104,
+          836.969,
+          838.663,
+          828.535,
+          838.72,
+          844.697,
+          836.841,
+          836.6,
+          833.358,
+          837.593,
+          834.834,
+          837.933,
+          836.15,
+          841.076,
+          836.539,
+          832.531,
+          836.329,
+          840.686,
+          846.264,
+          835.136,
+          853.648,
+          844.204,
+          834.591,
+          838.492,
+          819.918,
+          831.921,
+          819.507,
+          828.501
+        ],
+        "wall_samples_us": [
+          2147.853,
+          919.64,
+          906.21,
+          891.137,
+          896.155,
+          882.725,
+          886.75,
+          895.604,
+          892.209,
+          888.853
+        ],
+        "median_us": 836.6925,
+        "wall_median_us": 893.9065,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "FlashMla"
+        ]
+      },
+      {
+        "samples_us": [
+          854.88,
+          849.745,
+          834.177,
+          845.565,
+          836.036,
+          837.393,
+          840.458,
+          842.679,
+          841.598,
+          834.35,
+          840.822,
+          838.651,
+          837.814,
+          841.595,
+          834.583,
+          837.53,
+          845.353,
+          835.949,
+          850.115,
+          843.541,
+          841.763,
+          842.105,
+          839.537,
+          837.627,
+          838.668,
+          841.917,
+          840.149,
+          837.361,
+          839.552,
+          838.779,
+          838.46,
+          834.404,
+          848.24,
+          838.295,
+          824.373,
+          820.329,
+          835.63,
+          818.035,
+          839.385,
+          840.003
+        ],
+        "wall_samples_us": [
+          3190.728,
+          917.117,
+          900.321,
+          900.081,
+          907.331,
+          898.438,
+          895.844,
+          884.598,
+          892.509,
+          897.847
+        ],
+        "median_us": 839.082,
+        "wall_median_us": 899.2595,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "FlashMla"
+        ]
+      },
+      {
+        "samples_us": [
+          841.865,
+          846.737,
+          842.074,
+          842.1,
+          834.51,
+          839.142,
+          839.246,
+          836.121,
+          841.587,
+          838.329,
+          832.205,
+          838.627,
+          834.605,
+          836.193,
+          839.022,
+          834.793,
+          838.36,
+          837.952,
+          827.079,
+          834.932,
+          840.722,
+          835.958,
+          833.021,
+          840.416,
+          840.66,
+          813.253,
+          839.295,
+          834.382,
+          834.09,
+          840.268,
+          827.792,
+          839.926,
+          840.556,
+          835.629,
+          825.947,
+          846.686,
+          837.947,
+          839.316,
+          839.233,
+          839.936
+        ],
+        "wall_samples_us": [
+          2184.869,
+          927.332,
+          905.348,
+          904.567,
+          889.865,
+          890.817,
+          896.656,
+          906.901,
+          895.133,
+          892.519
+        ],
+        "median_us": 838.4935,
+        "wall_median_us": 900.6115,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "FlashMla"
+        ]
+      }
+    ],
+    "cannbot": [
+      {
+        "samples_us": [
+          866.452,
+          861.118,
+          860.637,
+          859.241,
+          864.003,
+          869.007,
+          865.952,
+          861.767,
+          867.32,
+          867.895,
+          861.38,
+          868.955,
+          864.353,
+          860.771,
+          871.816,
+          858.783,
+          870.508,
+          865.071,
+          865.712,
+          866.307,
+          861.484,
+          871.657,
+          861.983,
+          865.544,
+          863.877,
+          861.674,
+          860.442,
+          863.993,
+          862.756,
+          860.434,
+          864.597,
+          860.465,
+          865.548,
+          863.055,
+          859.449,
+          862.159,
+          862.347,
+          870.639,
+          869.539,
+          873.729
+        ],
+        "wall_samples_us": [
+          2992.55,
+          1287.162,
+          1200.532,
+          1174.803,
+          1153.621,
+          1158.558,
+          1132.259,
+          1134.041,
+          1125.959,
+          1118.639
+        ],
+        "median_us": 863.998,
+        "wall_median_us": 1156.0895,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5950\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "_Z37kernel_FlashMlaWithKvcache___call___029KernelArgTensor_bfloat16_t_3dS_29KernelArgTensor_bfloat16_t_4d24KernelArgTensor_float_2dfl26KernelArgTensor_int32_t_1d26KernelArgTensor_int32_t_2dS2_S2_S2_24KernelArgTensor_float_3d24KernelArgTensor_float_4d"
+        ]
+      },
+      {
+        "samples_us": [
+          870.785,
+          864.724,
+          863.09,
+          861.979,
+          861.56,
+          861.577,
+          858.756,
+          863.679,
+          870.088,
+          858.714,
+          861.558,
+          862.647,
+          859.276,
+          865.814,
+          868.786,
+          866.295,
+          868.295,
+          868.102,
+          864.56,
+          861.409,
+          858.783,
+          863.514,
+          861.996,
+          866.286,
+          865.783,
+          866.192,
+          864.025,
+          862.98,
+          865.351,
+          864.676,
+          866.808,
+          868.239,
+          862.534,
+          862.975,
+          864.089,
+          868.628,
+          865.264,
+          863.599,
+          865.255,
+          871.117
+        ],
+        "wall_samples_us": [
+          3019.991,
+          1307.142,
+          1208.493,
+          1168.263,
+          1147.272,
+          1129.545,
+          1171.518,
+          1130.957,
+          1139.199,
+          1133.521
+        ],
+        "median_us": 864.3245,
+        "wall_median_us": 1157.7675,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5964\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "_Z37kernel_FlashMlaWithKvcache___call___029KernelArgTensor_bfloat16_t_3dS_29KernelArgTensor_bfloat16_t_4d24KernelArgTensor_float_2dfl26KernelArgTensor_int32_t_1d26KernelArgTensor_int32_t_2dS2_S2_S2_24KernelArgTensor_float_3d24KernelArgTensor_float_4d"
+        ]
+      },
+      {
+        "samples_us": [
+          862.135,
+          861.492,
+          865.703,
+          859.821,
+          864.639,
+          862.328,
+          863.254,
+          859.932,
+          859.166,
+          859.355,
+          861.078,
+          862.127,
+          860.36,
+          859.594,
+          861.929,
+          861.216,
+          858.327,
+          860.993,
+          865.257,
+          860.929,
+          861.732,
+          861.557,
+          861.26,
+          864.852,
+          861.702,
+          862.345,
+          862.443,
+          862.239,
+          861.882,
+          861.169,
+          862.532,
+          873.058,
+          861.012,
+          866.439,
+          859.806,
+          868.064,
+          863.367,
+          861.394,
+          860.966,
+          866.249
+        ],
+        "wall_samples_us": [
+          2978.45,
+          1300.732,
+          1200.522,
+          1171.047,
+          1153.501,
+          1136.456,
+          1128.083,
+          1124.387,
+          1128.514,
+          1135.133
+        ],
+        "median_us": 861.717,
+        "wall_median_us": 1144.9785,
+        "occupancy_consistent": true,
+        "snapshots": [
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          },
+          {
+            "returncode": 0,
+            "pids": [
+              "40238"
+            ],
+            "physical_device": "2",
+            "text": "\tNPU ID                         : 2\n\tProcess id:40238   Process name:python            Process memory(MB):5968\n\n"
+          }
+        ],
+        "tasks_per_call": 1,
+        "task_names": [
+          "_Z37kernel_FlashMlaWithKvcache___call___029KernelArgTensor_bfloat16_t_3dS_29KernelArgTensor_bfloat16_t_4d24KernelArgTensor_float_2dfl26KernelArgTensor_int32_t_1d26KernelArgTensor_int32_t_2dS2_S2_S2_24KernelArgTensor_float_3d24KernelArgTensor_float_4d"
+        ]
+      }
+    ]
+  },
+  "dsl_sample": {
+    "source": "/home/l00898962/workspace/npuir/temp/20261110-cannbot-flash-mla.L50di4/source/samples/flash_mla_with_kvcache",
+    "expected_source_commit": "6e5bef20c29aad8bc74c66ae995aeeb01a4789f4",
+    "actual_source_commit": "6e5bef20c29aad8bc74c66ae995aeeb01a4789f4",
+    "h24_allowlist_extended": true,
+    "checker_original_sha256": "c68cd8f62d0282edb145041bcac1a5c00590f18e4689de9d858c625bfc26caff",
+    "checker_adapted_sha256": "4e09836820d98b4eaea1075f3be1e725fdd1c478a94c9725a1b0646264537002",
+    "file_sha256": {
+      "flash_mla_with_kvcache.py": "9606b7ea39abe1150171a1a951d7f4043b27705118fd2a2dc4ef5c8890099465",
+      "flash_mla_with_kvcache_metadata.py": "252839ca66e723ce2ab489dc9157082415e8dee3d6ac0adfde41a37b7a8afd82",
+      "checker.py": "c68cd8f62d0282edb145041bcac1a5c00590f18e4689de9d858c625bfc26caff"
+    }
+  },
+  "options": {
+    "tla": {
+      "cube_grid": 28,
+      "vector_cores": 56,
+      "head_tile": 96,
+      "split_pages": 161,
+      "splits": 5,
+      "kv_tile": 112,
+      "fuse_merge": true,
+      "return_lse": true,
+      "scale": 0.04,
+      "kv_l2": 4
+    },
+    "ascendc": {
+      "module": "/home/l00898962/workspace/npuir/temp/20261110-mla-ops-transformer.cXaT4q/python/cann_ops_transformer_custom/__init__.py",
+      "expected_source_commit": "897efb917ea657c759c4f7ce79a162e4729ebdd4",
+      "vendor": "/home/l00898962/workspace/npuir/temp/20261110-mla-ops-transformer.cXaT4q/vendor/vendors/custom_transformer:",
+      "prepared_metadata": true
+    },
+    "cannbot": {
+      "module": "/home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/mla-temp/results-mla-tla-r2/dsl-sample/flash_mla_with_kvcache.py",
+      "dsl_version": "0.7.0",
+      "expected_source_commit": "6e5bef20c29aad8bc74c66ae995aeeb01a4789f4",
+      "h24_allowlist_extended": true,
+      "prepared_metadata": true
+    }
+  },
+  "performance_precheck": {
+    "tla": {
+      "output": {
+        "normalized_max_error": 0.0033983143512159586,
+        "relative_rms": 0.0016662557609379292
+      },
+      "lse": {
+        "normalized_max_error": 1.537783020921779e-07,
+        "relative_rms": 4.254160401728768e-08
+      }
+    },
+    "ascendc": {
+      "output": {
+        "normalized_max_error": 0.0033983143512159586,
+        "relative_rms": 0.001666284166276455
+      },
+      "lse": {
+        "normalized_max_error": 1.537783020921779e-07,
+        "relative_rms": 4.1708283049501915e-08
+      }
+    },
+    "cannbot": {
+      "output": {
+        "normalized_max_error": 0.0033983143512159586,
+        "relative_rms": 0.0016662810230627656
+      },
+      "lse": {
+        "normalized_max_error": 1.537783020921779e-07,
+        "relative_rms": 4.198789227416455e-08
+      }
+    }
+  },
+  "medians": {
+    "tla": {
+      "device_us": 825.8599999999999,
+      "wall_us": 875.1279999999999
+    },
+    "ascendc": {
+      "device_us": 838.1234999999999,
+      "wall_us": 897.2515
+    },
+    "cannbot": {
+      "device_us": 862.9775,
+      "wall_us": 1153.5610000000001
+    }
+  },
+  "pct_of_ascendc": {
+    "tla": 101.48493691424697,
+    "ascendc": 100.0,
+    "cannbot": 97.11997126228667
+  }
+}

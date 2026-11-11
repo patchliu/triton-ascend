@@ -1,0 +1,20 @@
+[
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-package/bin/bishengir-compile",
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-dt/mla-pipeline/ragged/01_linalg.mlir",
+  "--target=Ascend950DT_9581",
+  "--enable-triton-kernel-compile=true",
+  "--enable-tla-mode",
+  "--custom-aic-number=32",
+  "--custom-aiv-number=64",
+  "--enable-optimized-metaop=true",
+  "--enable-auto-bind-sub-block=false",
+  "--enable-preload=false",
+  "--enable-auto-multi-buffer=true",
+  "--limit-auto-multi-buffer-of-local-buffer=no-limit",
+  "--enable-vf-operand-substitution=true",
+  "--enable-auto-blockify-loop",
+  "--enable-vf-merge-level=1",
+  "--save-temps=/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-dt/mla-pipeline/ragged/device-ir",
+  "-o",
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-dt/mla-pipeline/ragged/kernel.o"
+]

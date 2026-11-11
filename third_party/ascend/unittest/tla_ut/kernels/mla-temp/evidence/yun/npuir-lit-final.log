@@ -1,0 +1,30 @@
+llvm-lit: /home/liupengcheng/workspace/AscendNPU-IR/third-party/llvm-project/llvm/utils/lit/lit/llvm/subst.py:126: note: Did not find bishengir-capi-ir-test in :/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-build/./bin:
+llvm-lit: /home/liupengcheng/workspace/AscendNPU-IR/third-party/llvm-project/llvm/utils/lit/lit/llvm/subst.py:126: note: Did not find bishengir-capi-pass-test in :/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-build/./bin:
+llvm-lit: /home/liupengcheng/workspace/AscendNPU-IR/third-party/llvm-project/llvm/utils/lit/lit/llvm/subst.py:126: note: Did not find mlir-cpu-runner in :/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-build/./bin:
+llvm-lit: /home/liupengcheng/workspace/AscendNPU-IR/third-party/llvm-project/llvm/utils/lit/lit/llvm/subst.py:126: note: Did not find mlir_runner_utils in :/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-build/./bin:
+llvm-lit: /home/liupengcheng/workspace/AscendNPU-IR/third-party/llvm-project/llvm/utils/lit/lit/llvm/subst.py:126: note: Did not find mlir_c_runner_utils in :/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-build/./bin:
+-- Testing: 17 of 1399 tests, 17 workers --
+UNSUPPORTED: bishengir :: bishengir-compile/affinity/tla-stages.mlir (1 of 17)
+PASS: bishengir :: Dialect/HIVM/Preload/boundary-guards.mlir (2 of 17)
+PASS: bishengir :: Dialect/HIVM/SplitMixKernel/outline-vf.mlir (3 of 17)
+PASS: bishengir :: Dialect/HIVM/Preload/expand.mlir (4 of 17)
+PASS: bishengir :: Conversion/HIVMToStandard/RegBase/l12bt.mlir (5 of 17)
+PASS: bishengir :: Dialect/HIVM/Preload/expansion-invalid.mlir (6 of 17)
+PASS: bishengir :: Conversion/HIVMToStandard/RegBase/l12l0.mlir (7 of 17)
+PASS: bishengir :: Dialect/HIVM/AdaptTLAPipeline/invalid.mlir (8 of 17)
+PASS: bishengir :: Dialect/HIVM/Preload/schedule-invalid.mlir (9 of 17)
+PASS: bishengir :: Dialect/HIVM/mmadl0-plan-memory.mlir (10 of 17)
+PASS: bishengir :: Dialect/HIVM/mmadl0-plan-memory-allocs.mlir (11 of 17)
+PASS: bishengir :: Dialect/HIVM/Preload/order.mlir (12 of 17)
+PASS: bishengir :: Dialect/HIVM/SyncSolver/hivm-ccgss-tla-stages.mlir (13 of 17)
+PASS: bishengir :: Dialect/HIVM/AdaptTLAPipeline/stages.mlir (14 of 17)
+PASS: bishengir :: Dialect/HIVM/SyncSolver/hivm-gss-mmadl0.mlir (15 of 17)
+PASS: bishengir :: Conversion/HIVMToStandard/RegBase/mmadl0.mlir (16 of 17)
+PASS: bishengir :: Conversion/HIVMToStandard/RegBase/mmadl0-bf16.mlir (17 of 17)
+
+Testing Time: 0.30s
+
+Total Discovered Tests: 1399
+  Excluded   : 1382 (98.78%)
+  Unsupported:    1 (0.07%)
+  Passed     :   16 (1.14%)

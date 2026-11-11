@@ -1,0 +1,12 @@
+{
+  "BATCH": 4,
+  "QUERY_LENGTH": 4,
+  "QUERY_HEADS": 24,
+  "MAX_PAGES": 9,
+  "SPLIT_PAGES": 2,
+  "SPLITS": 5,
+  "CUBE_CORES": 20,
+  "SCALE": 0.04,
+  "Q_TILE_ROWS": 96,
+  "KV_L2": 4
+}

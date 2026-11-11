@@ -1,0 +1,23 @@
+[
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/npuir-package/bin/bishengir-compile",
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-pr/mla-tla/full/01_linalg.mlir",
+  "--target=Ascend950PR_9579",
+  "--enable-triton-kernel-compile=true",
+  "--enable-tla-mode",
+  "--custom-aic-number=28",
+  "--custom-aiv-number=56",
+  "--enable-optimized-metaop=true",
+  "--enable-auto-bind-sub-block=false",
+  "--enable-preload=false",
+  "--enable-auto-multi-buffer=true",
+  "--limit-auto-multi-buffer-of-local-buffer=no-limit",
+  "--enable-vf-operand-substitution=true",
+  "--enable-auto-blockify-loop",
+  "--enable-vf-merge-level=1",
+  "--disable-hivm-auto-inject-sync",
+  "--enable-hivm-unit-flag-sync=false",
+  "--enable-hivm-graph-sync-solver=true",
+  "--save-temps=/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-pr/mla-tla/full/device-ir",
+  "-o",
+  "/home/liupengcheng/workspace/npuir/temp/20261111-mla-final.hBf0WW/mla-temp/target-pr/mla-tla/full/kernel.o"
+]

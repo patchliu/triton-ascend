@@ -1,0 +1,4 @@
+10c0b8183a8e9cda86df95757fd6fadb53939ceb [HIVM][GraphSyncSolver] fix: allow equal preload indices
+1d2322edcc5763a8a6dc6b8043985d38410c8229 [Template] feat: support BF16 L0 matrix products
+5d61ac61356777a2da1961fbdda379c097317c1a [HIVM] feat: add explicit L0 matrix operations
+c96bb523d4ff04e3733c780ddf0521cdb2b6cd75 [HIVM] feat: support staged TLA pipelines

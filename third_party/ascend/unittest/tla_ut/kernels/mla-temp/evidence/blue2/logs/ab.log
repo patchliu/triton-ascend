@@ -1,0 +1,132 @@
+/home/l00898962/workspace/npuir/temp/20261111-flashmla-l0.iggOBZ/python-bf16-dynflags-o2/triton/language/extra/cann/extension/math_ops.py:13: FutureWarning: triton.language.extra.cann.extension.atan2 is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.atan2 instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.atan2")
+/home/l00898962/workspace/npuir/temp/20261111-flashmla-l0.iggOBZ/python-bf16-dynflags-o2/triton/language/extra/cann/extension/math_ops.py:35: FutureWarning: triton.language.extra.cann.extension.isfinited is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.isfinited instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.isfinited")
+/home/l00898962/workspace/npuir/temp/20261111-flashmla-l0.iggOBZ/python-bf16-dynflags-o2/triton/language/extra/cann/extension/math_ops.py:49: FutureWarning: triton.language.extra.cann.extension.finitef is deprecated and will be removed in the next release; use triton.language.extra.cann.libdevice.finitef instead.
+  @_deprecated(replacement="triton.language.extra.cann.libdevice.finitef")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:00] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:00] [INFO] [247177] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102000265_ascend_pt
+|/-[2026-11-11 10:20:02] [INFO] [247195] profiler.py: CANN profiling data parsed in a total time of 0:00:02.034109
+[2026-11-11 10:20:03] [INFO] [247177] profiler.py: All profiling data parsed in a total time of 0:00:02.652895
+ACCEPTED round-0-previous_l0.trace 796.387
+[2026-11-11 10:20:04] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:04] [INFO] [247976] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102004110_ascend_pt
+|/-\|/-\[2026-11-11 10:20:11] [INFO] [247995] profiler.py: CANN profiling data parsed in a total time of 0:00:07.027983
+[2026-11-11 10:20:12] [INFO] [247976] profiler.py: All profiling data parsed in a total time of 0:00:07.660406
+ACCEPTED round-0-final_l0.trace 792.934
+[2026-11-11 10:20:13] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:13] [INFO] [249309] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102013094_ascend_pt
+|/-\|/[2026-11-11 10:20:18] [INFO] [249341] profiler.py: CANN profiling data parsed in a total time of 0:00:05.022701
+[2026-11-11 10:20:19] [INFO] [249309] profiler.py: All profiling data parsed in a total time of 0:00:05.684725
+ACCEPTED round-0-previous_pipeline.trace 1144.3625000000002
+[2026-11-11 10:20:20] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:20] [INFO] [252268] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102020085_ascend_pt
+|/-[2026-11-11 10:20:22] [INFO] [252288] profiler.py: CANN profiling data parsed in a total time of 0:00:02.174427
+[2026-11-11 10:20:23] [INFO] [252268] profiler.py: All profiling data parsed in a total time of 0:00:02.788868
+ACCEPTED round-0-final_pipeline.trace 1141.5315
+[2026-11-11 10:20:24] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:24] [INFO] [253413] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102024036_ascend_pt
+|/-[2026-11-11 10:20:26] [INFO] [253430] profiler.py: CANN profiling data parsed in a total time of 0:00:02.034880
+[2026-11-11 10:20:27] [INFO] [253413] profiler.py: All profiling data parsed in a total time of 0:00:02.665135
+ACCEPTED round-1-final_l0.trace 796.402
+[2026-11-11 10:20:28] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:28] [INFO] [254202] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102027977_ascend_pt
+|/-[2026-11-11 10:20:30] [INFO] [254215] profiler.py: CANN profiling data parsed in a total time of 0:00:02.034499
+[2026-11-11 10:20:31] [INFO] [254202] profiler.py: All profiling data parsed in a total time of 0:00:02.662477
+ACCEPTED round-1-previous_pipeline.trace 1142.1525000000001
+[2026-11-11 10:20:32] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:32] [INFO] [255055] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102031829_ascend_pt
+|/-[2026-11-11 10:20:34] [INFO] [255070] profiler.py: CANN profiling data parsed in a total time of 0:00:02.035401
+[2026-11-11 10:20:35] [INFO] [255055] profiler.py: All profiling data parsed in a total time of 0:00:02.704309
+ACCEPTED round-1-final_pipeline.trace 1147.562
+[2026-11-11 10:20:35] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:36] [INFO] [256004] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102035770_ascend_pt
+|/-[2026-11-11 10:20:38] [INFO] [256021] profiler.py: CANN profiling data parsed in a total time of 0:00:02.035095
+[2026-11-11 10:20:39] [INFO] [256004] profiler.py: All profiling data parsed in a total time of 0:00:02.698800
+ACCEPTED round-1-previous_l0.trace 796.331
+[2026-11-11 10:20:39] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:40] [INFO] [257258] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102039731_ascend_pt
+|/-[2026-11-11 10:20:42] [INFO] [257274] profiler.py: CANN profiling data parsed in a total time of 0:00:02.054316
+[2026-11-11 10:20:43] [INFO] [257258] profiler.py: All profiling data parsed in a total time of 0:00:02.729892
+REJECTED_OCCUPANCY round-2-previous_pipeline.trace
+[2026-11-11 10:20:45] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:46] [INFO] [258615] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102045792_ascend_pt
+|/-[2026-11-11 10:20:48] [INFO] [258632] profiler.py: CANN profiling data parsed in a total time of 0:00:02.034677
+[2026-11-11 10:20:49] [INFO] [258615] profiler.py: All profiling data parsed in a total time of 0:00:02.698924
+ACCEPTED round-2-previous_pipeline.trace 1143.5415
+[2026-11-11 10:20:49] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:50] [INFO] [259415] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102049737_ascend_pt
+|/-[2026-11-11 10:20:52] [INFO] [259436] profiler.py: CANN profiling data parsed in a total time of 0:00:02.034776
+[2026-11-11 10:20:52] [INFO] [259415] profiler.py: All profiling data parsed in a total time of 0:00:02.664831
+ACCEPTED round-2-final_pipeline.trace 1144.7115000000001
+[2026-11-11 10:20:53] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:54] [INFO] [260309] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102053572_ascend_pt
+|/-[2026-11-11 10:20:56] [INFO] [260354] profiler.py: CANN profiling data parsed in a total time of 0:00:02.054893
+[2026-11-11 10:20:56] [INFO] [260309] profiler.py: All profiling data parsed in a total time of 0:00:02.695146
+ACCEPTED round-2-previous_l0.trace 796.2719999999999
+[2026-11-11 10:20:57] [WARNING] [226269] profiler.py: Incorrect schedule: Stop profiler while current state is RECORD which may result in incomplete parsed data.
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/home/l00898962/.conda/envs/tla-lpc/lib/python3.11/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/x86_64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[2026-11-11 10:20:58] [INFO] [262795] profiler.py: Start parsing profiling data in sync mode at: /home/l00898962/workspace/npuir/temp/20261111-mla-final.7w5piz/export_only_prof_dir/tbe_226269_20261111102057419_ascend_pt
+|/-[2026-11-11 10:21:00] [INFO] [262850] profiler.py: CANN profiling data parsed in a total time of 0:00:02.014829
+[2026-11-11 10:21:00] [INFO] [262795] profiler.py: All profiling data parsed in a total time of 0:00:02.654923
+ACCEPTED round-2-final_l0.trace 796.3145
+COMPLETE {"previous_l0": {"device_us": 796.3325, "wall_us": 843.821}, "final_l0": {"device_us": 794.9525, "wall_us": 844.2764999999999}, "previous_pipeline": {"device_us": 1143.279, "wall_us": 1203.786}, "final_pipeline": {"device_us": 1144.7379999999998, "wall_us": 1191.658}}
